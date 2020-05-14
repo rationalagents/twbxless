@@ -1,6 +1,6 @@
 FROM openjdk:11 as build
 
-# Download specific Java hyperapi version to /hyperapi
+# Download Hyper API package to /hyperapi
 RUN wget -q https://downloads.tableau.com/tssoftware/tableauhyperapi-java-linux-x86_64-release-hyperapi_release_7.0.0.10622.rf45095f2.zip -O /wget-out.zip \
   && unzip -q /wget-out.zip -d /hyperapi \
   && mv /hyperapi/*/* /hyperapi
@@ -10,15 +10,16 @@ RUN wget -q https://services.gradle.org/distributions/gradle-6.4-bin.zip -O /wge
   && unzip -q /wget-out.zip -d /opt/gradle
 ENV PATH="${PATH}:/opt/gradle/gradle-6.4/bin"
 
-# Build hypersuck
+# Build hypersuck (note build.gradle has a ref to lib, thus the workdir /hyperapi)
 WORKDIR /hyperapi
 COPY build.gradle .
 COPY src ./src
 RUN gradle build
 
+# Start over on runtime image
 FROM openjdk:11
 
-# Copy Hyper API and hypersuck over
+# Copy Hyper API and hypersuck from build
 COPY --from=build /hyperapi/lib /hyperapi/lib
 COPY --from=build /hyperapi/build/libs/hypersuck-0.0.1.jar /hyperapi/lib/hypersuck.jar
 
