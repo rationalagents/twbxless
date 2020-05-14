@@ -15,7 +15,7 @@ and will codify soon (so I said May 13, 2020.)
 For Linux/container, an example run command:
 
 ```
-docker run -8080:7777 -ePORT=7777 -eHYPERPATH=/hyperapi/lib/hyper <image-id-or-tag>
+docker run -p8080:7777 -ePORT=7777 -eHYPERPATH=/hyperapi/lib/hyper <image-id-or-tag>
 ```
 
 - **PORT** port to listen on
