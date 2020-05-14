@@ -1,16 +1,19 @@
 # hypersuck
-A web service that can source a Tableau extract (.twbx) URL and provide access to the data within it, as CSV.
+hypersuck's a service that retrieves Tableau workbook (.twbx) that've been published to the web, providing access to the
+raw data as CSV.
 
-This is useful for using a Tableau dashboard as a data source for any other dashboard, e.g. Google Data Studio.
+This is useful for building dashboards/visualizations using other tools, e.g. Google Data Studio or Power BI, using
+what was published first in Tableau as a basis.
 
-It's all thanks to [Tableau's Hyper API](https://help.tableau.com/current/api/hyper_api/en-us/index.html).
+This is possible thanks to [Tableau's Hyper API](https://help.tableau.com/current/api/hyper_api/en-us/index.html),
+which allows queries against Tableau Hyper extracts.
 
 ## Build
 
-On Windows, provide `gradle` executable, then [download Hyper API](https://tableau.com/support/releases/hyper-api/latest) and put its *lib* directory 
-(which notably contains Hyper API jars and hyperd.exe) in `./lib`. Then `gradle build`.
+On Windows, provide Java 11+ & gradle, then [download Hyper API](https://tableau.com/support/releases/hyper-api/latest) 
+and extract its *lib* directory (which notably contains Hyper API .jars and hyperd.exe) in `./lib`.  Then, `gradle build`.
 
-For Linux/container, `docker build .` is what you want. The image's based on a Java/Hyper API container I published
+For Linux/container, provide docker then `docker build .`. The base image is a OpenJDK/Hyper API container I published
 and will codify soon (I said coyly May 13, 2020.)
 
 ## Run
@@ -18,11 +21,13 @@ and will codify soon (I said coyly May 13, 2020.)
 For Linux/container:
 
 ```
-docker run -p8080:7777 -ePORT=7777 -eHYPERPATH=/hyperapi/lib/hyper <image-id-or-tag>
+docker run -p8080:7777 -ePORT=7777 -HYPEREXEC=/hyperapi/lib/hyper <image-id-or-tag>
 ```
 
-- **PORT** port to listen on
-- **HYPERPATH** path to the hyper executables, e.g. /hyperapi/lib/hyper in the container I built.
+**HYPEREXEC**: full path to Hyper executables packaged with Hyper API (`lib/hyper` within that package as of Hyper API 
+7.0.0.10622.) Defaults to `/hyperapi/lib/hyper` as assumption is you'll use the container
+
+**PORT**: the port to bind to. Defaults to `8080`.
 
 ## Use
 

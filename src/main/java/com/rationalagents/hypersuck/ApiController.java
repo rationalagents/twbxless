@@ -29,8 +29,8 @@ import static java.util.stream.Collectors.joining;
 @RestController
 public class ApiController {
 
-	@Value("${HYPERPATH}")
-	private String hyperPath;
+	@Value("${HYPEREXEC:/hyperapi/lib/hyper}")
+	private String hyperExec;
 
 	/**
 	 * E.g. http://localhost:8080/filenames?url=https://public.tableau.com/workbooks/DPHIdahoCOVID-19Dashboard_V2.twb
@@ -100,7 +100,7 @@ public class ApiController {
 
 			// Going from suck to Tableau!
 
-			try (HyperProcess process = new HyperProcess(Path.of(hyperPath),
+			try (HyperProcess process = new HyperProcess(Path.of(hyperExec),
 				Telemetry.DO_NOT_SEND_USAGE_DATA_TO_TABLEAU,
 				"",
 				// keep logs from filling container (https://help.tableau.com/current/api/hyper_api/en-us/reference/sql/loggingsettings.html);
