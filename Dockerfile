@@ -26,5 +26,4 @@ CMD ["java","-Djava.security.egd=file:/dev/./urandom", \
   "-Dspring.jmx.enabled=false", \
   "-XX:TieredStopAtLevel=1", \
   "-Djava.net.preferIPv4Stack=true", \
-  "-cp","/hyperapi/lib", \
   "-jar","/hyperapi/lib/hypersuck.jar"]
