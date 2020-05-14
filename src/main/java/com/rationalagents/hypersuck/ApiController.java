@@ -1,6 +1,5 @@
 package com.rationalagents.hypersuck;
 
-import com.tableau.hyperapi.Catalog;
 import com.tableau.hyperapi.Connection;
 import com.tableau.hyperapi.HyperProcess;
 import com.tableau.hyperapi.Result;
@@ -10,16 +9,12 @@ import com.tableau.hyperapi.Telemetry;
 import com.tableau.hyperapi.SchemaName;
 import com.tableau.hyperapi.SqlType;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URL;
@@ -27,7 +22,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -36,28 +30,60 @@ import static java.util.stream.Collectors.joining;
 @RestController
 public class ApiController {
 
-	private Logger logger = Logger.getLogger(ApiController.class.getName());
-
 	@Value("${HYPERPATH}")
 	private String hyperPath;
 
+	/**
+	 * E.g. http://localhost:8080/filenames?url=https://public.tableau.com/workbooks/DPHIdahoCOVID-19Dashboard_V2.twb
+	 */
+	@RequestMapping(value="filenames", method = RequestMethod.GET)
+	public String getFilenames(@RequestParam(defaultValue = "https://public.tableau.com/workbooks/DPHIdahoCOVID-19Dashboard_V2.twb") String url,
+														 HttpServletResponse response) throws IOException {
+		File tempDir = createTempDir();
+		try {
+
+			StringBuilder csv = new StringBuilder();
+			csv.append("filenames");
+			csv.append("\n");
+
+			try (ZipInputStream zis = new ZipInputStream(new URL(url).openStream())) {
+				ZipEntry ze = zis.getNextEntry();
+				while (ze != null) {
+					String fileName = ze.getName();
+					if (fileName.endsWith(".hyper")) {
+						csv.append(fileName);
+						csv.append("\n");
+					}
+					ze = zis.getNextEntry();
+				}
+
+				writeContentHeaders(response, "filenames.csv");
+				return csv.toString();
+			}
+		}
+		finally {
+			deleteTempDir(tempDir);
+		}
+	}
+
+	/**
+	 * E.g. http://localhost:8080/data?url=https://public.tableau.com/workbooks/DPHIdahoCOVID-19Dashboard_V2.twb&filename=County%20(COVID%20State%20Dashboard.V1).hyper
+	 */
 	@RequestMapping(value="data", method = RequestMethod.GET)
-	public String getData(@RequestParam(defaultValue = "https://public.tableau.com/workbooks/DPHIdahoCOVID-19Dashboard_V2.twb") String twbxUrl,
-												@RequestParam(defaultValue = "Data/Datasources/County (COVID State Dashboard.V1).hyper") String hyperFilename,
-												HttpServletResponse response) throws IOException {
+	public String getData(@RequestParam String url, @RequestParam String filename, HttpServletResponse response) throws IOException {
 
 		File tempDir = createTempDir();
 		try {
 			String matchFilenameExtracted = null;
 
-			try (ZipInputStream  zis  = new ZipInputStream(new URL(twbxUrl).openStream())) {
+			try (ZipInputStream zis  = new ZipInputStream(new URL(url).openStream())) {
 				ZipEntry ze = zis.getNextEntry();
 				while (ze != null) {
-					String fileName = ze.getName();
-					if (fileName.endsWith(".hyper")) {
+					String name = ze.getName();
+					if (name.endsWith(".hyper")) {
 
-						if (fileName.endsWith(hyperFilename)) {
-							String extractedFilename = tempDir.getAbsolutePath() + File.separator + fileName;
+						if (name.endsWith(filename)) {
+							String extractedFilename = tempDir.getAbsolutePath() + File.separator + name;
 							extractFile(zis, extractedFilename);
 
 							// Matched and extracted!
@@ -70,7 +96,7 @@ public class ApiController {
 			}
 
 			if (matchFilenameExtracted == null) {
-				return "No .hyper file matching\n" + hyperFilename;
+				return "No .hyper file matching\n" + filename;
 			}
 
 			// Going from suck to Tableau!
@@ -117,11 +143,9 @@ public class ApiController {
 						}
 					}
 
-					response.setContentType("text/csv");
-
-					String csvName = last(hyperFilename.split("/"))
-						.replace(".hyper", "");
-					response.setHeader("Content-Disposition","attachment; filename=\"" + csvName + ".csv\"");
+					String contentDispositionFilename = last(filename.split("/"))
+						.replace(".hyper", "") + ".csv";
+					writeContentHeaders(response, contentDispositionFilename);
 
 					return csv.toString();
 				}
@@ -130,6 +154,15 @@ public class ApiController {
 		finally {
 			deleteTempDir(tempDir);
 		}
+	}
+
+	/**
+	 * Writes content-type=text/csv and content-disposition as filename provided.
+	 * Expected caller will add ".csv" if they'd like the file to open nice in Excel etc.
+	 */
+	public void writeContentHeaders(HttpServletResponse response, String contentDispositionFilename) {
+		response.setContentType("text/csv");
+		response.setHeader("Content-Disposition","attachment; filename=\"" + contentDispositionFilename + "\"");
 	}
 
 	/**
