@@ -27,11 +27,9 @@ public class HyperUtils {
 			return result.isNull(position) ? "" : result.getString(position);
 		} else if (column.getType().equals(SqlType.date())) {
 			return result.isNull(position) ? "" : result.getLocalDate(position).toString();
-		} else if (column.getType().equals(SqlType.geography())) {
-			// ??
-			return result.isNull(position) ? "" : "?GEO";
 		} else {
-			return "?" + column.getType().toString();
+			// See README.md
+			return result.isNull(position) ? "" : "TYPE?";
 		}
 	}
 }
