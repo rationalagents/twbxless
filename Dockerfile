@@ -21,7 +21,7 @@ FROM openjdk:11
 
 # Copy Hyper API and hypersuck from build
 COPY --from=build /hyperapi/lib /hyperapi/lib
-COPY --from=build /hyperapi/build/libs/hypersuck-0.0.1.jar /hyperapi/lib/hypersuck.jar
+COPY --from=build /hyperapi/build/libs/hypersuck-0.0.2.jar /hyperapi/lib/hypersuck.jar
 
 CMD ["java","-Djava.security.egd=file:/dev/./urandom", \
   "-Dspring.jmx.enabled=false", \
