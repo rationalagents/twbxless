@@ -1,38 +1,10 @@
-target/
+build/
 !**/src/main/**
 !**/src/test/**
 gradle/
 .gradle
-.mvn
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-### IntelliJ IDEA ###
 .idea
-*.iws
-*.iml
-*.ipr
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-
-### VS Code ###
-.vscode/
-
-### hyperd logs when running in IntelliJ ###
-hyperd*
 
 ### you can put hyperapi's lib here to build easily in IntelliJ, outside Docker, but not in git thanks ###
 lib/
