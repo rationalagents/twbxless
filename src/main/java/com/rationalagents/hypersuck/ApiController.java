@@ -13,11 +13,14 @@ import com.tableau.hyperapi.SqlType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Path;
@@ -27,6 +30,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import static java.util.stream.Collectors.joining;
 
 @RestController
 public class ApiController {
@@ -38,7 +43,8 @@ public class ApiController {
 
 	@RequestMapping(value="data", method = RequestMethod.GET)
 	public String getData(@RequestParam(defaultValue = "https://public.tableau.com/workbooks/DPHIdahoCOVID-19Dashboard_V2.twb") String twbxUrl,
-										@RequestParam(defaultValue = "Data/Datasources/County (COVID State Dashboard.V1).hyper") String matchFilename) throws IOException {
+												@RequestParam(defaultValue = "Data/Datasources/County (COVID State Dashboard.V1).hyper") String hyperFilename,
+												HttpServletResponse response) throws IOException {
 
 		File tempDir = createTempDir();
 		try {
@@ -50,7 +56,7 @@ public class ApiController {
 					String fileName = ze.getName();
 					if (fileName.endsWith(".hyper")) {
 
-						if (fileName.endsWith(matchFilename)) {
+						if (fileName.endsWith(hyperFilename)) {
 							String extractedFilename = tempDir.getAbsolutePath() + File.separator + fileName;
 							extractFile(zis, extractedFilename);
 
@@ -64,10 +70,10 @@ public class ApiController {
 			}
 
 			if (matchFilenameExtracted == null) {
-				return "No files matching\n" + matchFilename;
+				return "No .hyper file matching\n" + hyperFilename;
 			}
 
-			logger.info("Going from suck to Tableau!");
+			// Going from suck to Tableau!
 
 			try (HyperProcess process = new HyperProcess(Path.of(hyperPath),
 				Telemetry.DO_NOT_SEND_USAGE_DATA_TO_TABLEAU,
@@ -75,39 +81,50 @@ public class ApiController {
 				// keep logs from filling container (https://help.tableau.com/current/api/hyper_api/en-us/reference/sql/loggingsettings.html);
 				Map.of("log_config", ""))) {
 
-				StringBuilder csvBuilder = new StringBuilder();
 				try (Connection connection = new Connection(process.getEndpoint(), matchFilenameExtracted)) {
 
-					Catalog catalog = connection.getCatalog();
-					SchemaName extractSchema = new SchemaName("Extract");
-					List<TableName> tableNames = catalog.getTableNames(extractSchema);
+					List<TableName> tableNames = connection.getCatalog().getTableNames(new SchemaName("Extract"));
 
-					// I wrote this thinking there were >1 tables in some files, but I never saw that to be the
-					// case w/ the Idaho DHW .hyper files. So this could be rewritten if there was some table name
-					// URL parameter. For now, we'll just return that there were != 1 table names as valid CSV.
+					// I wrote the above/below thinking there were >1 tables in some files, but I never saw that to be
+					// the case w/ Idaho DHW .hyper files. There was always just one table named "Extract", like the
+					// schema named "Extract." This could be rewritten to filter down to one table if there is a case
+					// where a .hyper has multiple tables. For now, we'll just return what names if != 1.
 					if (tableNames.size() != 1) {
-						return "Tables in " + matchFilename + "\n" + tableNames.size();
+						return "Unexpected tables\n" + tableNames.stream()
+							.map(v -> v.getName().toString())
+							.collect(joining("\n"));
 					}
+
+					StringBuilder csv = new StringBuilder();
 
 					for (TableName tableName : tableNames) {
 						Result result = connection.executeQuery("SELECT * FROM " + tableName.toString());
 						ResultSchema resultSchema = result.getSchema();
-
 						List<ResultSchema.Column> columns = resultSchema.getColumns();
 
-						csvBuilder.append(columns.stream().map(v -> v.getName().toString())
-							.collect(Collectors.joining(",")));
-						csvBuilder.append("\n");
+						// Headers
+						csv.append(columns.stream()
+							.map(v -> v.getName().toString())
+							.collect(joining(",")));
+						csv.append("\n");
 
+						// Rows
 						while (result.nextRow()) {
-							csvBuilder.append(columns.stream().map(v -> getCsvCell(v, result, resultSchema))
-								.collect(Collectors.joining(",")));
-							csvBuilder.append("\n");
+							csv.append(columns.stream()
+								.map(v -> getCsvCell(v, result, resultSchema))
+								.collect(joining(",")));
+							csv.append("\n");
 						}
 					}
-				}
 
-				return csvBuilder.toString();
+					response.setContentType("text/csv");
+
+					String csvName = last(hyperFilename.split("/"))
+						.replace(".hyper", "");
+					response.setHeader("Content-Disposition","attachment; filename=\"" + csvName + ".csv\"");
+
+					return csv.toString();
+				}
 			}
 		}
 		finally {
@@ -177,5 +194,9 @@ public class ApiController {
 		} else {
 			return "?" + column.getType().toString();
 		}
+	}
+
+	private static <T> T last(T[] list) {
+		return list[list.length - 1];
 	}
 }
