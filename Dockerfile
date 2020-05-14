@@ -1,14 +1,13 @@
 FROM waded/zyzzy:tableau-hyper1 as build
 
-WORKDIR /workdir
+WORKDIR /hyperapi
 COPY build.gradle .
 COPY src ./src
-COPY lib ./lib
 RUN gradle build
 
 FROM waded/zyzzy:tableau-hyper1
 
-COPY --from=build /workdir/build/libs/hypersuck-0.0.1.jar /hyperapi/lib/hypersuck.jar
+COPY --from=build /hyperapi/build/libs/hypersuck-0.0.1.jar /hyperapi/lib/hypersuck.jar
 
 CMD ["java","-Djava.security.egd=file:/dev/./urandom", \
   "-Dserver.port=${PORT}", \

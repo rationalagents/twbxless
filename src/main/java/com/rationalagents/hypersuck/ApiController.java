@@ -1,14 +1,28 @@
 package com.rationalagents.hypersuck;
 
-import com.tableau.hyperapi.*;
+import com.tableau.hyperapi.Catalog;
+import com.tableau.hyperapi.Connection;
+import com.tableau.hyperapi.HyperProcess;
+import com.tableau.hyperapi.Result;
+import com.tableau.hyperapi.ResultSchema;
+import com.tableau.hyperapi.TableName;
+import com.tableau.hyperapi.Telemetry;
+import com.tableau.hyperapi.SchemaName;
+import com.tableau.hyperapi.SqlType;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Logger;
@@ -19,9 +33,17 @@ import java.util.zip.ZipInputStream;
 @RestController
 public class ApiController {
 
+	private Environment environment;
+
+	private final String HYPERPATH = "HYPERPATH";
+
+	public ApiController(@Autowired Environment environment) {
+		this.environment = environment;
+	}
+
 	@RequestMapping(method = RequestMethod.GET)
 	public String get(@RequestParam(defaultValue = "https://public.tableau.com/workbooks/DPHIdahoCOVID-19Dashboard_V2.twb") String twbxUrl,
-										@RequestParam(defaultValue = "Data/Datasources/County (COVID State Dashboard.V1).hyper") String extractFilename) throws IOException {
+										@RequestParam(defaultValue = "Data/Datasources/County (COVID State Dashboard.V1).hyper") String extractFilename) throws IOException, URISyntaxException {
 
 		Logger logger = Logger.getLogger(ApiController.class.getName());
 
@@ -64,11 +86,19 @@ public class ApiController {
 				return "No files matching\n" + extractFilename;
 			}
 
+
+			if (!environment.containsProperty(HYPERPATH)) {
+				throw new RuntimeException(HYPERPATH + " was not set.");
+			}
+			Path hyperPath = Path.of(environment.getProperty(HYPERPATH));
+
 			logger.info("Going from suck to Tableau!");
 
 			// logging off https://help.tableau.com/current/api/hyper_api/en-us/reference/sql/loggingsettings.html));
-			HyperProcess process = new HyperProcess(Telemetry.DO_NOT_SEND_USAGE_DATA_TO_TABLEAU, "", Map.of(
-				"log_config", ""));
+			HyperProcess process = new HyperProcess(hyperPath,
+				Telemetry.DO_NOT_SEND_USAGE_DATA_TO_TABLEAU,
+				"",
+				Map.of("log_config", ""));
 
 			StringBuilder csvBuilder = new StringBuilder();
 			for (String fileName : matchingExtractedFilenames) {
