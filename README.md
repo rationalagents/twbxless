@@ -26,3 +26,13 @@ docker run -p8080:7777 -ePORT=7777 -eHYPERPATH=/hyperapi/lib/hyper <image-id-or-
 ```
 http://localhost:8080/?twbxUrl=https://public.tableau.com/workbooks/DPHIdahoCOVID-19Dashboard_V2.twb&extractFilename=Data/Datasources/County%20(COVID%20State%20Dashboard.V1).hyper
 ```
+
+## Deploy
+
+Although I'll do CI eventually, can easily version and push a `docker build` result to GCR as follows:
+
+```
+docker tag <tested-image-id> us.gcr.io/hypersuck/hypersuck:v1
+docker push us.gcr.io/hypersuck/hypersuck:v1
+```
+
