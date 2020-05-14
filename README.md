@@ -7,8 +7,6 @@ It's all thanks to [Tableau's Hyper API](https://help.tableau.com/current/api/hy
 
 ## Build
 
-The Hyper API downloads are at h.
-
 On Windows, provide `gradle` executable, then [download Hyper API](https://tableau.com/support/releases/hyper-api/latest) and put its *lib* directory 
 (which notably contains Hyper API jars and hyperd.exe) in `./lib`. Then `gradle build`.
 
