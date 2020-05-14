@@ -11,6 +11,7 @@ import com.tableau.hyperapi.SchemaName;
 import com.tableau.hyperapi.SqlType;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,10 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
@@ -33,77 +31,52 @@ import java.util.zip.ZipInputStream;
 @RestController
 public class ApiController {
 
-	private Environment environment;
+	private Logger logger = Logger.getLogger(ApiController.class.getName());
 
-	private final String HYPERPATH = "HYPERPATH";
+	@Value("${HYPERPATH}")
+	private String hyperPath;
 
-	public ApiController(@Autowired Environment environment) {
-		this.environment = environment;
-	}
+	@RequestMapping(value="data", method = RequestMethod.GET)
+	public String getData(@RequestParam(defaultValue = "https://public.tableau.com/workbooks/DPHIdahoCOVID-19Dashboard_V2.twb") String twbxUrl,
+										@RequestParam(defaultValue = "Data/Datasources/County (COVID State Dashboard.V1).hyper") String matchFilename) throws IOException {
 
-	@RequestMapping(method = RequestMethod.GET)
-	public String get(@RequestParam(defaultValue = "https://public.tableau.com/workbooks/DPHIdahoCOVID-19Dashboard_V2.twb") String twbxUrl,
-										@RequestParam(defaultValue = "Data/Datasources/County (COVID State Dashboard.V1).hyper") String extractFilename) throws IOException, URISyntaxException {
-
-		Logger logger = Logger.getLogger(ApiController.class.getName());
-
-		File tempDir = new File(System.getProperty("java.io.tmpdir") + "/hypersuck-" + UUID.randomUUID().toString());
+		File tempDir = createTempDir();
 		try {
-			if (!tempDir.exists()) {
-				tempDir.mkdir();
-			}
+			String matchFilenameExtracted = null;
 
-			List<String> matchingExtractedFilenames = new ArrayList<>();
-			InputStream stream = new URL(twbxUrl).openStream();
-			try (ZipInputStream  zis  = new ZipInputStream(stream)) {
+			try (ZipInputStream  zis  = new ZipInputStream(new URL(twbxUrl).openStream())) {
 				ZipEntry ze = zis.getNextEntry();
 				while (ze != null) {
 					String fileName = ze.getName();
-					if (fileName.endsWith(extractFilename)) {
-						logger.info("Found: " + extractFilename);
+					if (fileName.endsWith(".hyper")) {
 
-						File newFile = new File(tempDir.getAbsolutePath() + File.separator + fileName);
+						if (fileName.endsWith(matchFilename)) {
+							String extractedFilename = tempDir.getAbsolutePath() + File.separator + fileName;
+							extractFile(zis, extractedFilename);
 
-						matchingExtractedFilenames.add(newFile.getAbsolutePath());
-
-						new File(newFile.getParent()).mkdirs();
-						FileOutputStream fos = new FileOutputStream(newFile);
-						int len;
-						byte[] buffer = new byte[1024];
-						while ((len = zis.read(buffer)) > 0) {
-							fos.write(buffer, 0, len);
+							// Matched and extracted!
+							matchFilenameExtracted = extractedFilename;
 						}
-						fos.close();
-					} else if (fileName.endsWith(".hyper")) {
-						// log the other non-matching .hyper files in the extract
-						logger.info("Skipping: " + fileName);
+
 					}
 					ze = zis.getNextEntry();
 				}
 			}
 
-			if (matchingExtractedFilenames.size() == 0) {
-				return "No files matching\n" + extractFilename;
+			if (matchFilenameExtracted == null) {
+				return "No files matching\n" + matchFilename;
 			}
-
-
-			if (!environment.containsProperty(HYPERPATH)) {
-				throw new RuntimeException(HYPERPATH + " was not set.");
-			}
-			Path hyperPath = Path.of(environment.getProperty(HYPERPATH));
 
 			logger.info("Going from suck to Tableau!");
 
-			// logging off https://help.tableau.com/current/api/hyper_api/en-us/reference/sql/loggingsettings.html));
-			HyperProcess process = new HyperProcess(hyperPath,
+			try (HyperProcess process = new HyperProcess(Path.of(hyperPath),
 				Telemetry.DO_NOT_SEND_USAGE_DATA_TO_TABLEAU,
 				"",
-				Map.of("log_config", ""));
+				// keep logs from filling container (https://help.tableau.com/current/api/hyper_api/en-us/reference/sql/loggingsettings.html);
+				Map.of("log_config", ""))) {
 
-			StringBuilder csvBuilder = new StringBuilder();
-			for (String fileName : matchingExtractedFilenames) {
-
-				try (Connection connection = new Connection(process.getEndpoint(), fileName)) {
+				StringBuilder csvBuilder = new StringBuilder();
+				try (Connection connection = new Connection(process.getEndpoint(), matchFilenameExtracted)) {
 
 					Catalog catalog = connection.getCatalog();
 					SchemaName extractSchema = new SchemaName("Extract");
@@ -113,7 +86,7 @@ public class ApiController {
 					// case w/ the Idaho DHW .hyper files. So this could be rewritten if there was some table name
 					// URL parameter. For now, we'll just return that there were != 1 table names as valid CSV.
 					if (tableNames.size() != 1) {
-						return "Tables in " + extractFilename + "\n" + tableNames.size();
+						return "Tables in " + matchFilename + "\n" + tableNames.size();
 					}
 
 					for (TableName tableName : tableNames) {
@@ -133,22 +106,46 @@ public class ApiController {
 						}
 					}
 				}
+
+				return csvBuilder.toString();
 			}
-
-			// logger.info(builder.toString());
-			return csvBuilder.toString();
-
 		}
 		finally {
-			recursiveDeleteDir(tempDir);
+			deleteTempDir(tempDir);
 		}
+	}
 
+	/**
+	 * Creates a tempdir, ensuring it exists before proceeding.
+	 * Do not forget to delete using {@link #deleteTempDir(File)}!
+	 */
+	public File createTempDir() {
+		File tempDir = new File(System.getProperty("java.io.tmpdir") + "/hypersuck-" + UUID.randomUUID().toString());
+		if (!tempDir.exists()) {
+			tempDir.mkdir();
+		}
+		return tempDir;
+	}
+
+	/**
+	 * Given zip input stream positioned an entry, extracts the entry as a file with filename (full path to the file.)
+	 */
+	private static void extractFile(ZipInputStream zis, String filename) throws IOException {
+		File newFile = new File(filename);
+		new File(newFile.getParent()).mkdirs();
+		FileOutputStream fos = new FileOutputStream(newFile);
+		int len;
+		byte[] buffer = new byte[1024];
+		while ((len = zis.read(buffer)) > 0) {
+			fos.write(buffer, 0, len);
+		}
+		fos.close();
 	}
 
 	/**
 	 * Java can't delete directories unless they're empty, so delete every file, then delete directory
 	 */
-	private void recursiveDeleteDir(File directory) {
+	private void deleteTempDir(File directory) {
 		String[] files = directory.list();
 		for(String file: files){
 			new File(directory.getPath(),file).delete();
