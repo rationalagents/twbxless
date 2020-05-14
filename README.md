@@ -24,7 +24,7 @@ docker run -p8080:7777 -ePORT=7777 -eHYPERPATH=/hyperapi/lib/hyper <image-id-or-
 ## Use
 
 ```
-http://localhost:8080/?twbxUrl=https://public.tableau.com/workbooks/DPHIdahoCOVID-19Dashboard_V2.twb&extractFilename=Data/Datasources/County%20(COVID%20State%20Dashboard.V1).hyper
+http://localhost:8080/?url=https://public.tableau.com/workbooks/DPHIdahoCOVID-19Dashboard_V2.twb&filename=County%20(COVID%20State%20Dashboard.V1).hyper
 ```
 
 ## Deploy
