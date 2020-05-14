@@ -3,8 +3,11 @@ build/
 !**/src/test/**
 gradle/
 .gradle
+gradlew.bat
+gradlew
 
 .idea
 
-### you can put hyperapi's lib here to build easily in IntelliJ, outside Docker, but not in git thanks ###
+# you can put hyperapi's lib here to build easily in IntelliJ, outside Docker, but not in git thanks
 lib/
+
