@@ -23,8 +23,16 @@ docker run -p8080:7777 -ePORT=7777 -eHYPERPATH=/hyperapi/lib/hyper <image-id-or-
 
 ## Use
 
+Get .hyper filenames within a twb/twbx:
+
 ```
-http://localhost:8080/?url=https://public.tableau.com/workbooks/DPHIdahoCOVID-19Dashboard_V2.twb&filename=County%20(COVID%20State%20Dashboard.V1).hyper
+http://localhost:8080/filenames?url=https://public.tableau.com/workbooks/DPHIdahoCOVID-19Dashboard_V2.twb
+```
+
+Then get data out given a filename:
+
+```
+http://localhost:8080/data?url=https://public.tableau.com/workbooks/DPHIdahoCOVID-19Dashboard_V2.twb&filename=County%20(COVID%20State%20Dashboard.V1).hyper
 ```
 
 ## Deploy
