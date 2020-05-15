@@ -108,9 +108,9 @@ Total,2003,female,16,0.076,0
 
 No. It only reads the data that's directly in the .twbx file.
 
-#### I can't get Google Sheet's =IMPORTDATA to work
+#### Does Google Sheets' IMPORTDATA to work with http://localhost URLs?
 
-Google Sheets needs twbxless to be accessible from the internet. Run twbxless from some serverless somewhere, 
-e.g. Google Cloud Run, Azure Containers, AWS, or Heroku, instead of on your computer.
+Google Sheets needs twbxless to be accessible from the internet. Run twbxless from some serverless somewhere, e.g.
+Google Cloud Run, Azure Containers, AWS, or Heroku, instead of on your computer.
 
 
