@@ -99,7 +99,7 @@ Total,2003,female,16,0.076,0
   values will be `TYPE?`.
 - .hyper files can contain >1 schemas, and >1 tables within those schemas, but I didn't have any workbooks
   where that was the case. If used with such a file `/data` states this rather than choosing an arbitrary table. 
-  Please bring an example workbook to [Issues](Issues) and we can consider adding a `table` parameter.
+  Please bring an example workbook to [issues](/../../issues) and we can consider adding a `table` parameter.
 
 ## FAQ
 
