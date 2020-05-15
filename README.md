@@ -1,69 +1,85 @@
-# hypersuck
-hypersuck makes data exported into Tableau packaged workbooks available at CSV URLs for use in other tools, 
+# twbxless
+*twbxless* makes data exported in Tableau packaged workbook files (.twbx) available at CSV URLs for other tools, 
 e.g. Excel data models or Google Sheets IMPORTDATA. This is possible thanks to 
 [Tableau's Hyper API](https://help.tableau.com/current/api/hyper_api/en-us/index.html).
 
-It's possibly also useful for creating a network of Tableau workbooks, where creators riff off data 
-published by another organization in the Tableau format without worrying about the details of the workbook aside
-from its data. (This might require 
-[web data connector](https://help.tableau.com/current/pro/desktop/en-us/examples_web_data_connector.htm) 
-or Google Sheets IMPORTDATA, as it doesn't seem Tableau can pull CSV URLs directly.)
+It's possibly also useful for sustaining a community of Tableau visualization builders, where creators make new .twbx
+files containing new visualizations based on data extracted & published in a master .twbx. Using twbxless this way may
+require using [web data connector](https://help.tableau.com/current/pro/desktop/en-us/examples_web_data_connector.htm) 
+or Google Sheets IMPORTDATA, as it doesn't seem Tableau, as of 2020.1, can fetch CSV data from a URL on its own.
 
 ## Build
 
-For Docker, provide docker then `docker build . -t hypersuck`.
+To build twbxless as a container, provide 
+[Docker](https://hub.docker.com/search?q=&type=edition&offering=community&sort=updated_at&order=desc),
+then `docker build . -t twbxless`.
 
-On Windows (if you don't want to use Docker for Windows), provide Java 11 and gradle, then 
-[download Hyper API](https://tableau.com/support/releases/hyper-api/latest) and extract *lib* directory (which 
-contains e.g. *tableauhyperapi.jar* and *hyper/hyperd.exe*) to *lib* alongside *src*.
-
-Then `gradle build`.
+If you want to dev/build outside a container,
+ - provide Java 11 and gradle
+ - [download Hyper API](https://tableau.com/support/releases/hyper-api/latest)
+ - extract *lib* from the Hyper API package and put it along side *src*
+ - `gradle build`
 
 ## Run
 
-For Docker, after building:
+After building the container,
 
 ```
-docker run -p8080:8080 hypersuck:latest
+docker run -it -p8080:8080 twbxless:latest
 ```
 
-**HYPEREXEC**: full path to the executables packaged with Hyper API. Defaults to `/hyperapi/lib/hyper` since that's 
-correct for the provided Dockerfile.
-
-**PORT**: the port to bind HTTP listener to. Defaults to `8080`.
-
-For Windows, you're on your own. It'll be something like:
+and you should see output like:
 
 ```
-java -jar build/libs/hypersuck-0.0.2.jar -DHYPEREXEC=lib\hyper
-```   
+2020-05-14 23:39:50.695  INFO 1 --- [main] com.rationalagents.twbxless.Application     : Starting Application
+```
+
+That means it's running, and you're ready to move onto **Use.** You can Ctrl+C to stop.
+
+If you're thinking "yeah, I already did hard way once, `gradle build`, it definitely built, let me keep on this 
+so-called hard way, and I'm on Windows, so whatcha got for me dawg", do something like this:
+
+```
+set HYPEREXEC=lib\hyper
+java -jar build/libs/twbxless.jar
+```
+
+## Config (optional)
+
+twbxless supports two environment variables:
+
+**PORT**: lingua franca in servlerless, the port to bind to (default is `8080`)
+
+**HYPEREXEC**: path to the executables provided with Hyper API (default is `/hyperapi/lib/hyper` since that's where
+[Dockerfile](Dockerfile) put it)
+
 
 ## Use
 
-First you'll need to identify the .hyper extracts within a .twbx that's published on the web. To do that, 
-use the `/filenames` endpoint, specifying the `url` that downloads the workbook in .twbx format.
+First you'll need to identify the data extracts within a .twbx that's published on the web. To do that, 
+use the `/filenames` endpoint, specifying the `url` to the workbook.
 
 For example, for [this workbook featured on Viz of the Day](https://public.tableau.com/profile/maximiliano4575#!/vizhome/FemaleDirectors/FemaleDirectors)
-, the`url` we need is the one under the "Download" button. Use this with the `/filenames` endpoint:
+, the `url` we need's the one backing Tableau Public's "Download" button. Use `/filenames` with that `url`: 
 
 ```
 http://localhost:8080/filenames?url=https://public.tableau.com/workbooks/FemaleDirectors.twb
 ```
 
-and in CSV format you get the filenames (just 1 filename):
+and in CSV format you get a list of filenames (there's just 1 filename for *FemaleDirectors.twb*):
 
 ```
 filenames
 Data/Fuentes de datos/Hoja1 (genderOverall).hyper
 ```
 
-Then, we use the `/data` endpoint with the same `url` and the `filename` we want:
+Then we switch to the `/data` endpoint, using the same `url`, adding `filename`:
 
 ```
 http://localhost:8080/data?url=https://public.tableau.com/workbooks/FemaleDirectors.twb&filename=Data/Fuentes de datos/Hoja1 (genderOverall).hyper
 ```
 
-and this returns that data set (snipped)
+and we get the data from that file
 
 ```
 "genre","year","gender","freq","percent","filter"
@@ -74,28 +90,26 @@ Total,2001,male,186,0.925,0
 Total,2002,female,15,0.069,0
 Total,2002,male,201,0.931,0
 Total,2003,female,16,0.076,0
-... <snipped here> ...
+...
 ```
 
 ## Limitations
 
-- Not all column types are supported. Geography, for example, isn't supported. If an unsupported columns's detected the
-  column's included in the CSV, but non-null values will be `TYPE?`.
-- .hyper files can contain multiple schemas, and multiple tables within those schemas, but I didn't have any workbooks
-  where that was the case. If used with such a workbook `/data` states this rather than choosing an arbitrary table. 
-  Show an example workbook in [Issues](Issues) and we can consider adding a `table` parameter.
+- Not all column types are supported. Geography, for example, isn't. Unsupported columns are in the CSV, but non-null
+  values will be `TYPE?`.
+- .hyper files can contain >1 schemas, and >1 tables within those schemas, but I didn't have any workbooks
+  where that was the case. If used with such a file `/data` states this rather than choosing an arbitrary table. 
+  Please bring an example workbook to [Issues](Issues) and we can consider adding a `table` parameter.
 
 ## FAQ
 
-##### Does this provide access to the external data sources used to make a workbook?
+##### Does twbxless provide access to the external data sources used to make a workbook?
 
-No. It only reads data that's been extracted into the .hyper files within the .twbx file.
-(It's similar to what "View Data..." under "Data" in Tableau Desktop can show when completely disconnected from the 
-external source.)
+No. It only reads the data that's directly in the .twbx file.
 
-##### I can't get =IMPORTDATA("http<nolink>://localhost:8080/data?url=whatever&filename=whatever") to work
+##### I can't get Google Sheet's =IMPORTDATA to work
 
-Google Sheets needs the service to be accessible from the internet. I suggest running the container on some serverless
-something, e.g. Google Cloud Run, Azure, Amazon, Heroku.
+Google Sheets needs twbxless to be accessible from the internet. Run twbxless from some serverless somewhere, 
+e.g. Google Cloud Run, Azure Containers, AWS, or Heroku, instead of on your computer.
 
 

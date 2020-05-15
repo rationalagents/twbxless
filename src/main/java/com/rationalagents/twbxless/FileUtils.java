@@ -1,4 +1,4 @@
-package com.rationalagents.hypersuck;
+package com.rationalagents.twbxless;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -17,7 +17,7 @@ public class FileUtils {
 	 * Don't forget to delete using {@link #deleteTempDir(File)}!
 	 */
 	public static File createTempDir() {
-		File tempDir = new File(System.getProperty("java.io.tmpdir") + "/hypersuck-" + UUID.randomUUID().toString());
+		File tempDir = new File(System.getProperty("java.io.tmpdir") + "/twbxless-" + UUID.randomUUID().toString());
 		if (!tempDir.exists()) {
 			tempDir.mkdir();
 		}

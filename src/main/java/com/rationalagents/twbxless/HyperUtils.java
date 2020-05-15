@@ -1,4 +1,4 @@
-package com.rationalagents.hypersuck;
+package com.rationalagents.twbxless;
 
 import com.tableau.hyperapi.Result;
 import com.tableau.hyperapi.ResultSchema;

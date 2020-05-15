@@ -1,4 +1,4 @@
-package com.rationalagents.hypersuck;
+package com.rationalagents.twbxless;
 
 import java.util.stream.Stream;
 

@@ -5,9 +5,7 @@ plugins {
 }
 
 group = 'com.rationalagents'
-version = '0.0.2'
-archivesBaseName = 'hypersuck'
-description = 'hypersuck'
+archivesBaseName = 'twbxless'
 sourceCompatibility = '1.11'
 
 repositories {
