@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * A set of tests showing how twbxless works end-to-end. If these don't work, we don't have anything.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource(properties = {"HYPEREXEC=C:/Users/wade/hypersuck/lib/hyper"})
+@TestPropertySource(properties = {"HYPEREXEC=lib/hyper"})
 public class EndToEndTest {
 
 	private final String TWBX = "https://public.tableau.com/workbooks/Example_15896654403480.twb";
