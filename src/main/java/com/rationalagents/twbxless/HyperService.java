@@ -65,7 +65,7 @@ public class HyperService {
 			}
 
 			if (extractedFileName == null) {
-				throw new DataException("No .hyper file matching", List.of(fileName));
+				throw new DataException("No file matching", List.of(fileName));
 			}
 
 			// Going from suck to Tableau!
