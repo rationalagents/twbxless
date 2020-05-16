@@ -24,5 +24,4 @@ COPY --from=build /hyperapi/build/libs/twbxless.jar /hyperapi/lib
 ENTRYPOINT ["java", \
   "-Dspring.jmx.enabled=false", \
   "-XX:TieredStopAtLevel=1", \
-  "-Djava.net.preferIPv4Stack=true", \
   "-jar","/hyperapi/lib/twbxless.jar"]
