@@ -95,12 +95,12 @@ Total,2003,female,16,0.076,0
 
 ## Limitations
 
-- Not all column types are supported. Geography, for example, isn't. Unsupported columns are in the CSV, but non-null
-  values will be `TYPE?`. Please provide an example workbook at [issues](/../../issues) if you'd like a particular type
-  supported.
-- .hyper files can contain >1 schemas, and >1 tables within those schemas, but I didn't have any workbooks
-  where that was the case. If used with such a file `/data` states this rather than choosing an arbitrary table. 
-  Please bring an example workbook to [issues](/../../issues) and we can consider adding a `table` parameter.
+- This doesn't support all column types, for example geography. It'll include unsupported columns in the CSV, but 
+non-null values will be `TYPE?`. Please provide an example workbook at [issues](/../../issues) if you'd like support
+for a particular type.
+- .hyper files can contain >1 schemas, and >1 tables within those schemas, but I didn't have any workbooks where 
+that was the case. If used with such a file `/data` states this rather than choosing an arbitrary table. Please bring 
+an example workbook to [issues](/../../issues) and we can consider adding a `table` parameter.
 
 ## FAQ
 
@@ -108,9 +108,9 @@ Total,2003,female,16,0.076,0
 
 No. It only reads the data that's directly in the .twbx file.
 
-#### Does Google Sheets' IMPORTDATA to work with http://localhost URLs?
+#### Does Google Sheets' IMPORTDATA work with http:<nolink>//localhost:8080 URLs?
 
-Google Sheets needs twbxless to be accessible from the internet. Run twbxless from some serverless somewhere, e.g.
-Google Cloud Run, Azure Containers, AWS, or Heroku, instead of on your computer.
+No, Google Sheets needs twbxless to be accessible from the internet. Run twbxless from some serverless somewhere,
+e.g. Google Cloud Run, Azure Containers, AWS, or Heroku, instead of on your computer.
 
 
