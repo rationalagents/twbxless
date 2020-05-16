@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
@@ -32,59 +33,43 @@ public class Controller {
 
 	@RequestMapping(value="filenames", method = RequestMethod.GET)
 	public String getFilenames(@RequestParam String url) throws IOException {
-		File tempDir = FileUtils.createTempDir();
-		try {
+		StringBuilder csv = new StringBuilder();
+		csv.append("filenames");
+		csv.append("\n");
 
-			StringBuilder csv = new StringBuilder();
-			csv.append("filenames");
-			csv.append("\n");
-
-			try (ZipInputStream zis = new ZipInputStream(new URL(url).openStream())) {
-				ZipEntry ze = zis.getNextEntry();
-				while (ze != null) {
-					String fileName = ze.getName();
-					if (fileName.endsWith(".hyper")) {
-						csv.append(fileName);
-						csv.append("\n");
-					}
-					ze = zis.getNextEntry();
+		try (ZipInputStream zis = new ZipInputStream(new URL(url).openStream())) {
+			ZipEntry ze = zis.getNextEntry();
+			while (ze != null) {
+				String name = ze.getName();
+				if (name.endsWith(".hyper")) {
+					csv.append(name);
+					csv.append("\n");
 				}
-
-				return csv.toString();
+				ze = zis.getNextEntry();
 			}
-		}
-		finally {
-			FileUtils.deleteTempDir(tempDir);
+
+			return csv.toString();
 		}
 	}
 
 	@RequestMapping(value="data", method = RequestMethod.GET)
 	public String getData(@RequestParam String url, @RequestParam String filename) throws IOException {
 
-		File tempDir = FileUtils.createTempDir();
-		try {
-			String matchFilenameExtracted = null;
+		String extractedFileName = null;
 
+		try {
 			try (ZipInputStream zis  = new ZipInputStream(new URL(url).openStream())) {
 				ZipEntry ze = zis.getNextEntry();
 				while (ze != null) {
 					String name = ze.getName();
-					if (name.endsWith(".hyper")) {
-
-						if (name.endsWith(filename)) {
-							String extractedFilename = tempDir.getAbsolutePath() + File.separator + name;
-							FileUtils.extractFile(zis, extractedFilename);
-
-							// Matched and extracted!
-							matchFilenameExtracted = extractedFilename;
-						}
-
+					if (name.endsWith(filename)) {
+						extractedFileName = FileUtils.extractFile(zis);
 					}
 					ze = zis.getNextEntry();
 				}
 			}
 
-			if (matchFilenameExtracted == null) {
+			if (extractedFileName == null) {
 				return "No .hyper file matching\n" + filename;
 			}
 
@@ -95,7 +80,7 @@ public class Controller {
 				// keep logs from filling container (https://help.tableau.com/current/api/hyper_api/en-us/reference/sql/loggingsettings.html);
 				Map.of("log_config", ""))) {
 
-				try (Connection connection = new Connection(process.getEndpoint(), matchFilenameExtracted)) {
+				try (Connection connection = new Connection(process.getEndpoint(), extractedFileName)) {
 
 					List<TableName> tableNames = connection.getCatalog().getTableNames(new SchemaName("Extract"));
 
@@ -130,7 +115,9 @@ public class Controller {
 			}
 		}
 		finally {
-			FileUtils.deleteTempDir(tempDir);
+			if (extractedFileName != null) {
+				Files.delete(Path.of(extractedFileName));
+			}
 		}
 	}
 }
