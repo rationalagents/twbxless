@@ -98,9 +98,7 @@ Total,2003,female,16,0.076,0
 - This doesn't support all column types, for example geography. It'll include unsupported columns in the CSV, but 
 non-null values will be `TYPE?`. Please provide an example workbook at [issues](/../../issues) if you'd like support
 for a particular type.
-- .hyper files can contain >1 schemas, and >1 tables within those schemas, but I didn't have any workbooks where 
-that was the case. If used with such a file `/data` states this rather than choosing an arbitrary table. Please bring 
-an example workbook to [issues](/../../issues) and we can consider adding a `table` parameter.
+- Only a single schema & table per file are supported. [Let us know if you'd like support](/../../issues/4).
 
 ## FAQ
 
