@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.rationalagents'
 archivesBaseName = 'twbxless'
-sourceCompatibility = '1.11'
+sourceCompatibility = '1.14'
 
 repositories {
     mavenCentral()

@@ -1,4 +1,5 @@
-FROM openjdk:11 as build
+FROM openjdk:14-buster as build
+MAINTAINER wade@rationalagents.com
 
 # Download Hyper API to /hyperapi
 RUN wget -q https://downloads.tableau.com/tssoftware/tableauhyperapi-java-linux-x86_64-release-hyperapi_release_7.0.0.10622.rf45095f2.zip -O /wget-out.zip \
@@ -17,7 +18,7 @@ COPY src ./src
 RUN gradle build
 
 # Now the runtime image, keeping only Hyper API lib and twbxless.jar
-FROM openjdk:11
+FROM openjdk:14-slim
 COPY --from=build /hyperapi/lib /hyperapi/lib
 COPY --from=build /hyperapi/build/libs/twbxless.jar /hyperapi/lib
 
