@@ -21,7 +21,7 @@ FROM openjdk:11
 COPY --from=build /hyperapi/lib /hyperapi/lib
 COPY --from=build /hyperapi/build/libs/twbxless.jar /hyperapi/lib
 
-ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom", \
+ENTRYPOINT ["java", \
   "-Dspring.jmx.enabled=false", \
   "-XX:TieredStopAtLevel=1", \
   "-Djava.net.preferIPv4Stack=true", \
