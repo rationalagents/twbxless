@@ -2,7 +2,6 @@ package com.rationalagents.twbxless;
 
 import com.tableau.hyperapi.Result;
 import com.tableau.hyperapi.ResultSchema;
-import com.tableau.hyperapi.SqlType;
 
 public class HyperUtils {
 
@@ -18,18 +17,16 @@ public class HyperUtils {
 	 * Might consider trying {@link Result#getObject(int)}.
 	 */
 	static String getString(ResultSchema.Column column, Result result, ResultSchema schema) {
-		int position = schema.getColumnPositionByName(column.getName()).getAsInt();
-		if (column.getType().equals(SqlType.bigInt())) {
-			return result.isNull(position) ? "" : Long.toString(result.getLong(position));
-		} else if (column.getType().equals(SqlType.doublePrecision())) {
-			return result.isNull(position) ? "" : Double.toString(result.getDouble(position));
-		} else if (column.getType().equals(SqlType.text())) {
-			return result.isNull(position) ? "" : result.getString(position);
-		} else if (column.getType().equals(SqlType.date())) {
-			return result.isNull(position) ? "" : result.getLocalDate(position).toString();
-		} else {
+		int position = schema.getColumnPositionByName(column.getName()).orElseThrow();
+
+		if (result.isNull(position)) return "";
+
+		return switch(column.getTypeTag()) {
+			case TEXT, VARCHAR, CHAR, JSON,
+				BOOL, OID, SMALL_INT, INT, BIG_INT, DOUBLE, NUMERIC,
+				DATE, TIME, TIMESTAMP -> result.getObject(position).toString();
 			// See README.md
-			return result.isNull(position) ? "" : "TYPE?";
-		}
+			case UNSUPPORTED, BYTES, INTERVAL, TIMESTAMP_TZ, GEOGRAPHY-> "TYPE?";
+		};
 	}
 }
