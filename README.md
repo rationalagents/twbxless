@@ -68,7 +68,7 @@ For example, for [this workbook featured on Viz of the Day](https://public.table
 http://localhost:8080/filenames?url=https://public.tableau.com/workbooks/FemaleDirectors.twb
 ```
 
-and in CSV format you get a list of filenames (there's just 1 filename for *FemaleDirectors.twb*):
+and in CSV format you get a list of .hyper extract filenames within that workbook (there's just 1 in *FemaleDirectors.twb*):
 
 ```
 filenames
@@ -84,7 +84,7 @@ http://localhost:8080/data?url=https://public.tableau.com/workbooks/FemaleDirect
 and we get the data from that file
 
 ```
-"genre","year","gender","freq","percent","filter"
+genre,year,gender,freq,percent,filter
 Total,2000,female,17,0.096,0
 Total,2000,male,161,0.904,0
 Total,2001,female,15,0.075,0
