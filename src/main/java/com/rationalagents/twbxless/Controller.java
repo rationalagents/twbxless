@@ -55,7 +55,7 @@ public class Controller {
 		static String toCsv(List<List<String>> rows) {
 			return rows.stream()
 				.map(v -> String.join(",", v))
-				.collect(joining("\n"));
+				.collect(joining("\r\n"));
 		}
 	}
 }

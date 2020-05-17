@@ -27,7 +27,7 @@ public class EndToEndTest {
 
 	@Test
 	public void canGetFilenames() {
-		assertEquals("filenames\nData/TableauTemp/TEMP_0kf7uk81qi1qyf18sg86d1m8pl9s.hyper",
+		assertEquals("filenames\r\nData/TableauTemp/TEMP_0kf7uk81qi1qyf18sg86d1m8pl9s.hyper",
 			restTemplate.getForObject("http://localhost:" + port + "/filenames?url=" + TWBX, String.class));
 	}
 
@@ -36,7 +36,7 @@ public class EndToEndTest {
 		assertThat(
 			restTemplate.getForObject("http://localhost:" + port + "/data?url=" + TWBX
 				+ "&filename=Data/TableauTemp/TEMP_0kf7uk81qi1qyf18sg86d1m8pl9s.hyper", String.class))
-			.contains("\"Date\",\"Animal Observed\",\"Animal\",\"Leg Count\"\n")
-			.contains("2020-05-15,Frog,Frog,4\n");
+			.contains("\"Date\",\"Animal Observed\",\"Animal\",\"Leg Count\"\r\n")
+			.contains("2020-05-15,Frog,Frog,4\r\n");
 	}
 }
