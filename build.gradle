@@ -1,12 +1,12 @@
 plugins {
-    id 'org.springframework.boot' version '2.2.2.RELEASE'
-    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+    id 'org.springframework.boot' version '2.3.0.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
     id 'java'
 }
 
 group = 'com.rationalagents'
 archivesBaseName = 'twbxless'
-sourceCompatibility = '1.11'
+sourceCompatibility = '14'
 
 repositories {
     mavenCentral()
@@ -14,5 +14,13 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web',
-            fileTree(dir: 'lib', include: '*.jar')
+        'net.sf.supercsv:super-csv:2.4.0',
+        fileTree(dir: 'lib', include: '*.jar')
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+}
+
+test {
+    useJUnitPlatform()
 }
