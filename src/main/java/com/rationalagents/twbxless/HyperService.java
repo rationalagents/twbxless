@@ -47,6 +47,12 @@ public class HyperService {
 		}
 	}
 
+	/**
+	 * Returns data for specified filename within URL.
+	 *
+	 * For convenience (because filenames seem pseudo-random, trying to work out an alternative),
+	 * it goes with first ends-with match.
+	 */
 	public List<List<String>> getData(String url, String fileName) {
 		String extractedFileName = null;
 
@@ -55,10 +61,12 @@ public class HyperService {
 				ZipEntry ze = zis.getNextEntry();
 				while (ze != null) {
 					String name = ze.getName();
-					if (name.endsWith(fileName)) {
+					if (name.endsWith(".hyper") && name.endsWith(fileName)) /* allow ends-with to match */ {
 						extractedFileName = FileUtils.extractFile(zis);
+						ze = null; // exit
+					} else {
+						ze = zis.getNextEntry();
 					}
-					ze = zis.getNextEntry();
 				}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -92,7 +100,7 @@ public class HyperService {
 					List<ResultSchema.Column> columns = resultSchema.getColumns();
 
 					List<List<String>> result = new ArrayList<>();
-					result.add(columns.stream().map(v -> v.getName().toString()).collect(toList()));
+					result.add(columns.stream().map(v -> v.getName().getUnescaped()).collect(toList()));
 					while (resultSet.nextRow()) {
 						result.add(columns.stream().map(v -> HyperUtils.getString(v, resultSet, resultSchema)).collect(Collectors.toList()));
 					}

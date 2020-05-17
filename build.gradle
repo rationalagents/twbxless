@@ -14,7 +14,8 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web',
-            fileTree(dir: 'lib', include: '*.jar')
+        'net.sf.supercsv:super-csv:2.4.0',
+        fileTree(dir: 'lib', include: '*.jar')
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }

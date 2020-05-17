@@ -7,6 +7,8 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.TestPropertySource;
 
+import java.io.IOException;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -27,7 +29,7 @@ public class EndToEndTest {
 
 	@Test
 	public void canGetFilenames() {
-		assertEquals("filenames\r\nData/TableauTemp/TEMP_0kf7uk81qi1qyf18sg86d1m8pl9s.hyper",
+		assertEquals("filenames\r\nData/TableauTemp/TEMP_0kf7uk81qi1qyf18sg86d1m8pl9s.hyper\r\n",
 			restTemplate.getForObject("http://localhost:" + port + "/filenames?url=" + TWBX, String.class));
 	}
 
@@ -36,7 +38,15 @@ public class EndToEndTest {
 		assertThat(
 			restTemplate.getForObject("http://localhost:" + port + "/data?url=" + TWBX
 				+ "&filename=Data/TableauTemp/TEMP_0kf7uk81qi1qyf18sg86d1m8pl9s.hyper", String.class))
-			.contains("\"Date\",\"Animal Observed\",\"Animal\",\"Leg Count\"\r\n")
+			.contains("Date,Animal Observed,Animal,Leg Count\r\n")
 			.contains("2020-05-15,Frog,Frog,4\r\n");
+	}
+
+	@Test
+	public void issue1CsvEncoding() throws IOException {
+		assertEquals(
+			restTemplate.getForObject("http://localhost:" + port + "/data?url=classpath:tricky.twbx"
+				+ "&filename=.hyper", String.class),
+				FileUtils.readToEnd(getClass().getClassLoader().getResourceAsStream("tricky.csv")));
 	}
 }

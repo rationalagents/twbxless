@@ -3,6 +3,8 @@ package com.rationalagents.twbxless;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.ZipInputStream;
 
 /**
@@ -27,5 +29,14 @@ public class FileUtils {
 		fos.close();
 
 		return file.getAbsolutePath();
+	}
+
+	/**
+	 * Reads all bytes to String assuming UTF-8 and closes stream
+	 */
+	public static String readToEnd(InputStream stream) throws IOException {
+		try (stream) {
+			return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+		}
 	}
 }

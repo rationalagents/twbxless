@@ -4,11 +4,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.supercsv.io.CsvListWriter;
+import org.supercsv.prefs.CsvPreference;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
-
-import static java.util.stream.Collectors.joining;
 
 @RestController
 public class Controller {
@@ -35,17 +37,14 @@ public class Controller {
 	}
 
 	/**
-	 * Factored these out and grouped so I could write tests on what I had first, but
-	 * these are issue #1.
+	 * Nicer here would be message converter but planning to do something else
 	 */
 	private static class Csv {
 		static String toCsv(String singleHeader, List<String> singleColumn) {
-			List<List<String>> response = new ArrayList<>();
-			response.add(List.of(singleHeader));
-			for (String row : singleColumn) {
-				response.add(List.of(row));
-			}
-			return toCsv(response);
+			List<List<String>> list = new ArrayList<>();
+			list.add(List.of(singleHeader));
+			singleColumn.forEach(v -> list.add(List.of(v)));
+			return toCsv(list);
 		}
 
 		static String toCsv(DataException e) {
@@ -53,9 +52,18 @@ public class Controller {
 		}
 
 		static String toCsv(List<List<String>> rows) {
-			return rows.stream()
-				.map(v -> String.join(",", v))
-				.collect(joining("\r\n"));
+			StringWriter writer = new StringWriter();
+			CsvListWriter csvWriter = new CsvListWriter(writer, CsvPreference.STANDARD_PREFERENCE);
+
+			try {
+				for (List<String> row : rows) {
+					csvWriter.write(row);
+				}
+				csvWriter.close();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			return writer.toString();
 		}
 	}
 }
