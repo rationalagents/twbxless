@@ -21,12 +21,12 @@ public class Controller {
 		this.hyperService = hyperService;
 	}
 
-	@RequestMapping(value="filenames", method = RequestMethod.GET)
+	@RequestMapping(value="filenames", method = RequestMethod.GET, produces="text/plain")
 	public String getFilenames(@RequestParam String url) {
 		return Csv.toCsv("filenames", hyperService.getFilenames(url));
 	}
 
-	@RequestMapping(value="data", method = RequestMethod.GET)
+	@RequestMapping(value="data", method = RequestMethod.GET, produces="text/plain")
 	public String getData(@RequestParam String url, @RequestParam String filename) {
 
 		try {
