@@ -15,7 +15,7 @@ To build twbxless as a container, provide
 then `docker build . -t twbxless`.
 
 If you want to dev/build outside a container,
- - provide Java 11 and gradle
+ - provide JDK 14 and gradle
  - [download Hyper API](https://tableau.com/support/releases/hyper-api/latest)
  - extract *lib* from the Hyper API package and put it along side *src*
  - `gradle build`
