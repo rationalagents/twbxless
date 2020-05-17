@@ -4,7 +4,7 @@ import java.util.List;
 
 public class DataException extends RuntimeException {
 
-	private List<String> extraData;
+	private final List<String> extraData;
 
 	public DataException(String message, List<String> extraData) {
 		super(message);
@@ -14,6 +14,4 @@ public class DataException extends RuntimeException {
 	public List<String> getExtraData() {
 		return extraData;
 	}
-
-
 }

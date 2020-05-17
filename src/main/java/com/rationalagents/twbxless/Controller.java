@@ -13,7 +13,7 @@ import static java.util.stream.Collectors.joining;
 @RestController
 public class Controller {
 
-	private HyperService hyperService;
+	private final HyperService hyperService;
 
 	public Controller(HyperService hyperService) {
 		this.hyperService = hyperService;

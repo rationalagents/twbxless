@@ -15,7 +15,7 @@ public class FileUtils {
 	 * Given {@link ZipInputStream} positioned on an entry, extracts the entry as a file,
 	 * returning the the full path to the file.
 	 */
-	static String extractFile(ZipInputStream zis) throws IOException {
+	public static String extractFile(ZipInputStream zis) throws IOException {
 		File file = File.createTempFile("twbxless-", "");
 
 		FileOutputStream fos = new FileOutputStream(file);
