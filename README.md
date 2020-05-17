@@ -50,8 +50,7 @@ twbxless supports 3 configuration environment variables:
 
 **PORT**: lingua franca in servlerless, the port to bind to (default is `8080`)
 
-**HYPEREXEC**: path to the executables provided with Hyper API (default is `/hyperapi/lib/hyper` since that's where
-[Dockerfile](Dockerfile) put it)
+**HYPEREXEC**: path to the executables (e.g. hyperd or hyperd.exe) packaged with Hyper API (default is `/hyperapi/lib/hyper` since that's where [Dockerfile](Dockerfile) puts them)
 
 **URLPREFIX**: required prefix for any URL retrieved (default is `https://public.tableau.com/`)
 
