@@ -13,7 +13,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -102,7 +101,7 @@ public class HyperService {
 						.map(TableName::toString)// e.g. "Extract"."Extract"
 						.collect(toList());
 					if (tableNames.size() != 1) {
-						throw new DataException("Found multiple schemas/tables", tableNames);
+						throw new DataException("Found ambiguous number of schemas/tables", tableNames);
 					}
 
 					String tableName = tableNames.get(0);
@@ -111,9 +110,13 @@ public class HyperService {
 					List<ResultSchema.Column> columns = resultSchema.getColumns();
 
 					List<List<String>> result = new ArrayList<>();
-					result.add(columns.stream().map(v -> v.getName().getUnescaped()).collect(toList()));
+					result.add(columns.stream()
+						.map(v -> v.getName().getUnescaped())
+						.collect(toList()));
 					while (resultSet.nextRow()) {
-						result.add(columns.stream().map(v -> HyperUtils.getString(v, resultSet, resultSchema)).collect(Collectors.toList()));
+						result.add(columns.stream()
+							.map(v -> HyperUtils.getString(v, resultSet, resultSchema))
+							.collect(toList()));
 					}
 					return result;
 				}
