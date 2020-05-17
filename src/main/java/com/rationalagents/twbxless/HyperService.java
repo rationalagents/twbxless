@@ -25,9 +25,18 @@ public class HyperService {
 	Logger logger = LoggerFactory.getLogger(HyperService.class);
 
 	@Value("${HYPEREXEC:/hyperapi/lib/hyper}")
-	private String hyperExec;
+	String hyperExec;
 
-	public List<String> getFilenames(String url ) {
+	@Value("${URLPREFIX:https://public.tableau.com/}")
+	String urlPrefix;
+
+	public void throwIfWrongPrefix(String url) {
+		if (!url.startsWith(urlPrefix)) throw new RuntimeException("url must start with " + urlPrefix);
+	}
+
+	public List<String> getFilenames(String url) {
+		throwIfWrongPrefix(url);
+
 		List<String> result = new ArrayList<>();
 
 		try (ZipInputStream zis = new ZipInputStream(new URL(url).openStream())) {
@@ -54,6 +63,8 @@ public class HyperService {
 	 * it goes with first ends-with match.
 	 */
 	public List<List<String>> getData(String url, String fileName) {
+		throwIfWrongPrefix(url);
+
 		String extractedFileName = null;
 
 		try {

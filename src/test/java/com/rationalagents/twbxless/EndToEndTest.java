@@ -16,10 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * A set of tests showing how twbxless works end-to-end. If these don't work, we don't have anything.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource(properties = {"HYPEREXEC=lib/hyper"})
+@TestPropertySource(properties = {"HYPEREXEC=lib/hyper", "URLPREFIX=classpath:"})
 public class EndToEndTest {
-
-	private final String TWBX = "https://public.tableau.com/workbooks/Example_15896654403480.twb";
 
 	@LocalServerPort
 	private int port;
@@ -30,13 +28,14 @@ public class EndToEndTest {
 	@Test
 	public void canGetFilenames() {
 		assertEquals("filenames\r\nData/TableauTemp/TEMP_0kf7uk81qi1qyf18sg86d1m8pl9s.hyper\r\n",
-			restTemplate.getForObject("http://localhost:" + port + "/filenames?url=" + TWBX, String.class));
+			restTemplate.getForObject("http://localhost:" + port + "/filenames?url=classpath:animal-observations.twbx",
+				String.class));
 	}
 
 	@Test
 	public void canGetData() {
 		assertThat(
-			restTemplate.getForObject("http://localhost:" + port + "/data?url=" + TWBX
+			restTemplate.getForObject("http://localhost:" + port + "/data?url=classpath:animal-observations.twbx"
 				+ "&filename=Data/TableauTemp/TEMP_0kf7uk81qi1qyf18sg86d1m8pl9s.hyper", String.class))
 			.contains("Date,Animal Observed,Animal,Leg Count\r\n")
 			.contains("2020-05-15,Frog,Frog,4\r\n");

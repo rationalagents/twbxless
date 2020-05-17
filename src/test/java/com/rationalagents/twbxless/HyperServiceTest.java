@@ -25,4 +25,17 @@ public class HyperServiceTest {
 		assertEquals("No file matching", thrown.getMessage());
 		assertEquals(List.of("DNE.hyper"), thrown.getExtraData());
 	}
+
+	@Test
+	public void expectExceptionIfUrlOutsideAllowed() {
+		RuntimeException thrown = assertThrows(RuntimeException.class,
+			() -> service.getFilenames("https://badstuff.com"));
+
+		assertEquals("url must start with https://public.tableau.com/", thrown.getMessage());
+
+		thrown = assertThrows(RuntimeException.class,
+			() -> service.getData("https://badstuff.com", "doesntmatter"));
+
+		assertEquals("url must start with https://public.tableau.com/", thrown.getMessage());
+	}
 }
