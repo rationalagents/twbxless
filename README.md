@@ -12,7 +12,7 @@ or Google Sheets IMPORTDATA, as it doesn't seem Tableau, as of 2020.2, can fetch
 ## Build
 
 To build twbxless as a container, provide 
-[Docker](https://hub.docker.com/search?q=&type=edition&offering=community&sort=updated_at&order=desc),
+[Docker](https://hub.docker.com/search?q=&type=edition&offering=community&sort=updated_at&order=desc)
 then `docker build . -t twbxless`.
 
 If you want to dev/build outside a container,
@@ -23,7 +23,7 @@ If you want to dev/build outside a container,
 
 ## Run
 
-After building the container,
+After building the container, run
 
 ```
 docker run -it -p8080:8080 twbxless:latest
