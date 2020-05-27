@@ -64,13 +64,13 @@ public class HyperService {
 			try (FileInputStream stream =  new FileInputStream(extractedTwb)) {
 				Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
 				NodeList extracts = (NodeList)XPathFactory.newInstance().newXPath()
-					.evaluate("//extract/connection" , doc, XPathConstants.NODESET);
+					.evaluate("//extract/connection[@dbname]" , doc, XPathConstants.NODESET);
 
 				for (int i = 0; i < extracts.getLength(); i++) {
 					Node extractNode = extracts.item(i);
-					String filename = extractNode.getAttributes().getNamedItem("dbname").getNodeValue();
-					String caption = extractNode.getParentNode().getParentNode().getAttributes().getNamedItem("caption").getNodeValue();
-					result.add(new DataSource(caption, filename));
+					String filename = getValueOrNull(extractNode, "dbname");
+					String caption = getValueOrNull(extractNode.getParentNode().getParentNode(), "caption");
+					result.add(new DataSource(caption == null ? "?" : caption, filename));
 				}
 
 				return result;
@@ -80,6 +80,11 @@ public class HyperService {
 		} finally {
 			tryDeleteFile(extractedTwb);
 		}
+	}
+
+	private String getValueOrNull(Node node, String attributeName) {
+		Node attribute = node.getAttributes().getNamedItem(attributeName);
+		return attribute == null ? null : attribute.getNodeValue();
 	}
 
 	public static class DataSource {
