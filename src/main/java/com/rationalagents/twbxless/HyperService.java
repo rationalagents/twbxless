@@ -5,7 +5,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -39,6 +49,46 @@ public class HyperService {
 		});
 
 		return result;
+	}
+
+	public List<DataSource> getDataSources(String url) {
+
+		String extractedTwb = extract(url, (name) -> name.endsWith(".twb"));
+		if (extractedTwb == null) {
+			throw new RuntimeException("No .twb file in " + url);
+		}
+
+		try {
+			List<DataSource> result = new ArrayList<>();
+
+			try (FileInputStream stream =  new FileInputStream(extractedTwb)) {
+				Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
+				NodeList extracts = (NodeList)XPathFactory.newInstance().newXPath()
+					.evaluate("//extract/connection" , doc, XPathConstants.NODESET);
+
+				for (int i = 0; i < extracts.getLength(); i++) {
+					Node extractNode = extracts.item(i);
+					String filename = extractNode.getAttributes().getNamedItem("dbname").getNodeValue();
+					String caption = extractNode.getParentNode().getParentNode().getAttributes().getNamedItem("caption").getNodeValue();
+					result.add(new DataSource(caption, filename));
+				}
+
+				return result;
+			} catch (IOException | ParserConfigurationException | SAXException | XPathExpressionException e) {
+				throw new RuntimeException(e);
+			}
+		} finally {
+			tryDeleteFile(extractedTwb);
+		}
+	}
+
+	public static class DataSource {
+		public String caption;
+		public String filename;
+		public DataSource(String caption, String filename) {
+			this.caption = caption;
+			this.filename = filename;
+		}
 	}
 
 	/**
