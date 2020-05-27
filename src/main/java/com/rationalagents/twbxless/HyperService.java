@@ -30,13 +30,7 @@ public class HyperService {
 	@Value("${URLPREFIX:https://public.tableau.com/}")
 	String urlPrefix;
 
-	public void throwIfWrongPrefix(String url) {
-		if (!url.startsWith(urlPrefix)) throw new RuntimeException("url must start with " + urlPrefix);
-	}
-
 	public List<String> getFilenames(String url) {
-		throwIfWrongPrefix(url);
-
 		List<String> result = new ArrayList<>();
 
 		extract(url, (name) -> {
@@ -54,19 +48,15 @@ public class HyperService {
 	 * it goes with first ends-with match.
 	 */
 	public List<List<String>> getData(String url, String fileName) {
-		throwIfWrongPrefix(url);
 
-		String extractedFileName = null;
+		String extractedFileName = extract(url, (name) -> {
+			return name.endsWith(".hyper") && name.endsWith(fileName); /* allow ends-with to match */
+		});
+		if (extractedFileName == null) {
+			throw new DataException("No file matching", List.of(fileName));
+		}
 
 		try {
-			extractedFileName = extract(url, (name) -> {
-				return name.endsWith(".hyper") && name.endsWith(fileName); /* allow ends-with to match */
-			});
-
-			if (extractedFileName == null) {
-				throw new DataException("No file matching", List.of(fileName));
-			}
-
 			// Going from suck to Tableau!
 			try (HyperProcess process = new HyperProcess(Path.of(hyperExec),
 				Telemetry.DO_NOT_SEND_USAGE_DATA_TO_TABLEAU,
@@ -104,13 +94,7 @@ public class HyperService {
 			}
 		}
 		finally {
-			if (extractedFileName != null) {
-				try {
-					Files.delete(Path.of(extractedFileName));
-				} catch (IOException e) {
-					logger.warn("Didn't delete " + extractedFileName, e);
-				}
-			}
+			tryDeleteFile(extractedFileName);
 		}
 
 	}
@@ -122,6 +106,8 @@ public class HyperService {
 	 * Returns the extracted temp filename, or null if tester never returned true.
 	 */
 	public String extract(String url, Predicate<String> tester) {
+		throwIfWrongPrefix(url);
+
 		try (ZipInputStream zis = new ZipInputStream(new URL(url).openStream())) {
 			ZipEntry ze = zis.getNextEntry();
 			while (ze != null) {
@@ -135,6 +121,28 @@ public class HyperService {
 			throw new RuntimeException(e);
 		}
 		return null;
+	}
+
+	/**
+	 * Throws if URL does not start with the configured prefix. This is to prevent
+	 */
+	private void throwIfWrongPrefix(String url) {
+		if (!url.startsWith(urlPrefix)) {
+			throw new RuntimeException("url must start with " + urlPrefix);
+		}
+	}
+
+	/**
+	 * If fileName is not null, try to delete the file. warns in log if didn't delete.
+	 */
+	private void tryDeleteFile(String fileName) {
+		if (fileName != null) {
+			try {
+				Files.delete(Path.of(fileName));
+			} catch (IOException e) {
+				logger.warn("Didn't delete " + fileName, e);
+			}
+		}
 	}
 
 }
