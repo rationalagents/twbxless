@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -38,21 +39,12 @@ public class HyperService {
 
 		List<String> result = new ArrayList<>();
 
-		try (ZipInputStream zis = new ZipInputStream(new URL(url).openStream())) {
-			ZipEntry ze = zis.getNextEntry();
-			while (ze != null) {
-				String name = ze.getName();
-				if (name.endsWith(".hyper")) {
-					result.add(name);
-				}
-				ze = zis.getNextEntry();
-			}
+		extract(url, (name) -> {
+			if (name.endsWith(".hyper")) result.add(name);
+			return false;
+		});
 
-			return result;
-
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		return result;
 	}
 
 	/**
@@ -67,20 +59,9 @@ public class HyperService {
 		String extractedFileName = null;
 
 		try {
-			try (ZipInputStream zis  = new ZipInputStream(new URL(url).openStream())) {
-				ZipEntry ze = zis.getNextEntry();
-				while (ze != null) {
-					String name = ze.getName();
-					if (name.endsWith(".hyper") && name.endsWith(fileName)) /* allow ends-with to match */ {
-						extractedFileName = FileUtils.extractFile(zis);
-						ze = null; // exit
-					} else {
-						ze = zis.getNextEntry();
-					}
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+			extractedFileName = extract(url, (name) -> {
+				return name.endsWith(".hyper") && name.endsWith(fileName); /* allow ends-with to match */
+			});
 
 			if (extractedFileName == null) {
 				throw new DataException("No file matching", List.of(fileName));
@@ -134,5 +115,26 @@ public class HyperService {
 
 	}
 
+
+	/**
+	 * Retrieve .twbx file at URL, then pass each file name within to tester.
+	 * If tester would like to extract it, return true, otherwise continues.
+	 * Returns the extracted temp filename, or null if tester never returned true.
+	 */
+	public String extract(String url, Predicate<String> tester) {
+		try (ZipInputStream zis = new ZipInputStream(new URL(url).openStream())) {
+			ZipEntry ze = zis.getNextEntry();
+			while (ze != null) {
+				boolean extract = tester.test(ze.getName());
+				if (extract) {
+					return FileUtils.extractFile(zis);
+				}
+				ze = zis.getNextEntry();
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		return null;
+	}
 
 }
