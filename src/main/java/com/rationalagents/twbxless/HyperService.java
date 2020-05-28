@@ -42,13 +42,11 @@ public class HyperService {
 	String urlPrefix;
 
 	public List<String> getFilenames(String url) {
-		List<String> result = new ArrayList<>();
-
+		var result = new ArrayList<String>();
 		extract(url, (name) -> {
 			if (name.endsWith(".hyper")) result.add(name);
 			return false;
 		});
-
 		return result;
 	}
 
@@ -56,24 +54,23 @@ public class HyperService {
 	 * Returns map of datasource name to filename. If no name, just uses filename.
 	 */
 	public Map<String,String> getDataSources(String url) {
-
-		String extractedTwb = extract(url, (name) -> name.endsWith(".twb"));
-		if (extractedTwb == null) {
+		var extractedFileName = extract(url, (name) -> name.endsWith(".twb"));
+		if (extractedFileName == null) {
 			throw new RuntimeException("No .twb file in " + url);
 		}
 
 		try {
-			Map<String,String> result = new HashMap<>();
+			var result = new HashMap<String, String>();
 
-			try (FileInputStream stream =  new FileInputStream(extractedTwb)) {
-				Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
-				NodeList extracts = (NodeList)XPathFactory.newInstance().newXPath()
+			try (var stream =  new FileInputStream(extractedFileName)) {
+				var doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
+				var extracts = (NodeList)XPathFactory.newInstance().newXPath()
 					.evaluate("//extract/connection[@dbname]" , doc, XPathConstants.NODESET);
 
 				for (int i = 0; i < extracts.getLength(); i++) {
-					Node extractNode = extracts.item(i);
-					String filename = getValueOrNull(extractNode, "dbname");
-					String caption = getValueOrNull(extractNode.getParentNode().getParentNode(), "caption");
+					var extractNode = extracts.item(i);
+					var filename = getValueOrNull(extractNode, "dbname");
+					var caption = getValueOrNull(extractNode.getParentNode().getParentNode(), "caption");
 					result.put(caption == null ? filename : caption, filename);
 				}
 
@@ -82,17 +79,17 @@ public class HyperService {
 				throw new RuntimeException(e);
 			}
 		} finally {
-			tryDeleteFile(extractedTwb);
+			tryDeleteFile(extractedFileName);
 		}
 	}
 
 	private String getValueOrNull(Node node, String attributeName) {
-		Node attribute = node.getAttributes().getNamedItem(attributeName);
+		var attribute = node.getAttributes().getNamedItem(attributeName);
 		return attribute == null ? null : attribute.getNodeValue();
 	}
 
 	public List<List<String>> getDataByName(String url, String name) {
-		Map<String,String> dataSources = getDataSources(url);
+		var dataSources = getDataSources(url);
 
 		if (!dataSources.containsKey(name)) {
 			throw new DataException("No name match, valid names follow" , dataSources.keySet());
@@ -108,8 +105,7 @@ public class HyperService {
 	 * with a redundant path part.
 	 */
 	public List<List<String>> getDataByFilename(String url, String fileName) {
-
-		String extractedFileName = extract(url, (name) -> {
+		var extractedFileName = extract(url, (name) -> {
 			return name.endsWith(".hyper") && name.endsWith(fileName); /* allow ends-with to match */
 		});
 		if (extractedFileName == null) {
@@ -117,17 +113,16 @@ public class HyperService {
 		}
 
 		try {
-			// Going from suck to Tableau!
-			try (HyperProcess process = new HyperProcess(Path.of(hyperExec),
+			try (var process = new HyperProcess(Path.of(hyperExec),
 				Telemetry.DO_NOT_SEND_USAGE_DATA_TO_TABLEAU,
 				"",
 				// keep logs from filling container (https://help.tableau.com/current/api/hyper_api/en-us/reference/sql/loggingsettings.html);
 				Map.of("log_config", ""))) {
 
-				try (Connection connection = new Connection(process.getEndpoint(), extractedFileName)) {
+				try (var connection = new Connection(process.getEndpoint(), extractedFileName)) {
 
 					// We could support > table/schema here, see issue #4.
-					List<String> tableNames = connection.getCatalog().getSchemaNames().stream()
+					var tableNames = connection.getCatalog().getSchemaNames().stream()
 						.flatMap(v -> connection.getCatalog().getTableNames(v).stream())
 						.map(TableName::toString)// e.g. "Extract"."Extract"
 						.collect(toList());
@@ -135,12 +130,12 @@ public class HyperService {
 						throw new DataException("Found ambiguous number of schemas/tables", tableNames);
 					}
 
-					String tableName = tableNames.get(0);
-					Result resultSet = connection.executeQuery("SELECT * FROM " + tableName);
-					ResultSchema resultSchema = resultSet.getSchema();
-					List<ResultSchema.Column> columns = resultSchema.getColumns();
+					var tableName = tableNames.get(0);
+					var resultSet = connection.executeQuery("SELECT * FROM " + tableName);
+					var resultSchema = resultSet.getSchema();
+					var columns = resultSchema.getColumns();
 
-					List<List<String>> result = new ArrayList<>();
+					var result = new ArrayList<List<String>>();
 					result.add(columns.stream()
 						.map(v -> v.getName().getUnescaped())
 						.collect(toList()));
@@ -156,9 +151,7 @@ public class HyperService {
 		finally {
 			tryDeleteFile(extractedFileName);
 		}
-
 	}
-
 
 	/**
 	 * Retrieve .twbx file at URL, then pass each file name within to tester.
@@ -168,11 +161,10 @@ public class HyperService {
 	public String extract(String url, Predicate<String> tester) {
 		throwIfWrongPrefix(url);
 
-		try (ZipInputStream zis = new ZipInputStream(new URL(url).openStream())) {
-			ZipEntry ze = zis.getNextEntry();
+		try (var zis = new ZipInputStream(new URL(url).openStream())) {
+			var ze = zis.getNextEntry();
 			while (ze != null) {
-				boolean extract = tester.test(ze.getName());
-				if (extract) {
+				if (tester.test(ze.getName())) {
 					return FileUtils.extractFile(zis);
 				}
 				ze = zis.getNextEntry();
