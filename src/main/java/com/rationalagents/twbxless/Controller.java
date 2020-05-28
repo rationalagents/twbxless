@@ -12,8 +12,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
-
 @RestController
 public class Controller {
 
@@ -31,8 +29,8 @@ public class Controller {
 	@RequestMapping(value="datasources", method = RequestMethod.GET, produces="text/plain")
 	public String getDataSources(@RequestParam String url) {
 		List<List<String>> result = new ArrayList<>();
-		result.add(List.of("caption", "filename"));
-		result.addAll(hyperService.getDataSources(url).stream().map(v -> List.of(v.caption, v.filename)).collect(toList()));
+		result.add(List.of("name", "filename"));
+		hyperService.getDataSources(url).forEach((k, v) -> result.add(List.of(k, v)));
 		return Csv.toCsv(result);
 	}
 

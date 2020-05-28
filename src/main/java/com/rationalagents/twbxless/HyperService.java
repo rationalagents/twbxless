@@ -21,6 +21,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -51,7 +52,10 @@ public class HyperService {
 		return result;
 	}
 
-	public List<DataSource> getDataSources(String url) {
+	/**
+	 * Returns map of datasource name to filename. If no name, just uses filename.
+	 */
+	public Map<String,String> getDataSources(String url) {
 
 		String extractedTwb = extract(url, (name) -> name.endsWith(".twb"));
 		if (extractedTwb == null) {
@@ -59,7 +63,7 @@ public class HyperService {
 		}
 
 		try {
-			List<DataSource> result = new ArrayList<>();
+			Map<String,String> result = new HashMap<>();
 
 			try (FileInputStream stream =  new FileInputStream(extractedTwb)) {
 				Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
@@ -70,7 +74,7 @@ public class HyperService {
 					Node extractNode = extracts.item(i);
 					String filename = getValueOrNull(extractNode, "dbname");
 					String caption = getValueOrNull(extractNode.getParentNode().getParentNode(), "caption");
-					result.add(new DataSource(caption == null ? "?" : caption, filename));
+					result.put(caption == null ? filename : caption, filename);
 				}
 
 				return result;
@@ -85,15 +89,6 @@ public class HyperService {
 	private String getValueOrNull(Node node, String attributeName) {
 		Node attribute = node.getAttributes().getNamedItem(attributeName);
 		return attribute == null ? null : attribute.getNodeValue();
-	}
-
-	public static class DataSource {
-		public String caption;
-		public String filename;
-		public DataSource(String caption, String filename) {
-			this.caption = caption;
-			this.filename = filename;
-		}
 	}
 
 	/**
