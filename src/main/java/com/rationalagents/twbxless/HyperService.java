@@ -91,19 +91,29 @@ public class HyperService {
 		return attribute == null ? null : attribute.getNodeValue();
 	}
 
+	public List<List<String>> getDataByName(String url, String name) {
+		Map<String,String> dataSources = getDataSources(url);
+
+		if (!dataSources.containsKey(name)) {
+			throw new DataException("No name match, valid names follow" , dataSources.keySet());
+		}
+
+		return getDataByFilename(url, dataSources.get(name));
+	}
+
 	/**
 	 * Returns data for specified filename within URL.
 	 *
-	 * For convenience (because filenames seem pseudo-random, trying to work out an alternative),
-	 * it goes with first ends-with match.
+	 * The first file that is an ends-with match with filename will be used, since the filenames can be rather long
+	 * with a redundant path part.
 	 */
-	public List<List<String>> getData(String url, String fileName) {
+	public List<List<String>> getDataByFilename(String url, String fileName) {
 
 		String extractedFileName = extract(url, (name) -> {
 			return name.endsWith(".hyper") && name.endsWith(fileName); /* allow ends-with to match */
 		});
 		if (extractedFileName == null) {
-			throw new DataException("No file matching", List.of(fileName));
+			throw new DataException("No file match", List.of(fileName));
 		}
 
 		try {

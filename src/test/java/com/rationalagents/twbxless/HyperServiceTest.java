@@ -18,12 +18,21 @@ public class HyperServiceTest {
 	HyperService service;
 
 	@Test
-	public void expectExceptionIfMissingFilename() {
+	public void expectExceptionDataIfWrongFilename() {
 		DataException thrown = assertThrows(DataException.class,
-			() -> service.getData("https://public.tableau.com/workbooks/Example_15896654403480.twb", "DNE.hyper"));
+			() -> service.getDataByFilename("https://public.tableau.com/workbooks/Example_15896654403480.twb", "DNE.hyper"));
 
-		assertEquals("No file matching", thrown.getMessage());
+		assertEquals("No file match", thrown.getMessage());
 		assertEquals(List.of("DNE.hyper"), thrown.getExtraData());
+	}
+
+	@Test
+	public void expectExceptionDataIfWrongName() {
+		DataException thrown = assertThrows(DataException.class,
+			() -> service.getDataByName("https://public.tableau.com/workbooks/Example_15896654403480.twb", "DNE"));
+
+		assertEquals("No name match, valid names follow", thrown.getMessage());
+		assertEquals(List.of("Data Source 1"), thrown.getExtraData());
 	}
 
 	@Test
@@ -34,7 +43,7 @@ public class HyperServiceTest {
 		assertEquals("url must start with https://public.tableau.com/", thrown.getMessage());
 
 		thrown = assertThrows(RuntimeException.class,
-			() -> service.getData("https://badstuff.com", "doesntmatter"));
+			() -> service.getDataByFilename("https://badstuff.com", "doesntmatter"));
 
 		assertEquals("url must start with https://public.tableau.com/", thrown.getMessage());
 	}

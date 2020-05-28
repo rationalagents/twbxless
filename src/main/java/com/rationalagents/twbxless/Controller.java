@@ -10,6 +10,7 @@ import org.supercsv.prefs.CsvPreference;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -34,11 +35,21 @@ public class Controller {
 		return Csv.toCsv(result);
 	}
 
-	@RequestMapping(value="data", method = RequestMethod.GET, produces="text/plain")
-	public String getData(@RequestParam String url, @RequestParam String filename) {
+	@RequestMapping(value="data", method = RequestMethod.GET, produces="text/plain", params = {"url", "filename"})
+	public String getDataByFilename(@RequestParam String url, @RequestParam String filename) {
 
 		try {
-			return Csv.toCsv(hyperService.getData(url, filename));
+			return Csv.toCsv(hyperService.getDataByFilename(url, filename));
+		} catch (DataException e) {
+			return Csv.toCsv(e);
+		}
+	}
+
+	@RequestMapping(value="data", method = RequestMethod.GET, produces="text/plain", params = {"url", "name"})
+	public String getDataByName(@RequestParam String url, @RequestParam String name) {
+
+		try {
+			return Csv.toCsv(hyperService.getDataByName(url, name));
 		} catch (DataException e) {
 			return Csv.toCsv(e);
 		}
