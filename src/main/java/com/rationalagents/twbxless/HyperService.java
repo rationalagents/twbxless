@@ -177,6 +177,7 @@ public class HyperService {
 
 	/**
 	 * Throws if URL does not start with the configured prefix. This is to prevent
+	 * the service from being used to crawl things its not meant for.
 	 */
 	private void throwIfWrongPrefix(String url) {
 		if (!url.startsWith(urlPrefix)) {
