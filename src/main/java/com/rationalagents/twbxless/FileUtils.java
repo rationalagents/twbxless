@@ -18,15 +18,14 @@ public class FileUtils {
 	 * returning the the full path to the file.
 	 */
 	public static String extractFile(ZipInputStream zis) throws IOException {
-		File file = File.createTempFile("twbxless-", "");
-
-		FileOutputStream fos = new FileOutputStream(file);
+		var file = File.createTempFile("twbxless-", "");
+		var outputStream = new FileOutputStream(file);
 		int len;
 		byte[] buffer = new byte[1024];
 		while ((len = zis.read(buffer)) > 0) {
-			fos.write(buffer, 0, len);
+			outputStream.write(buffer, 0, len);
 		}
-		fos.close();
+		outputStream.close();
 
 		return file.getAbsolutePath();
 	}
