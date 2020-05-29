@@ -10,6 +10,7 @@ import org.supercsv.prefs.CsvPreference;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -26,11 +27,27 @@ public class Controller {
 		return Csv.toCsv("filenames", hyperService.getFilenames(url));
 	}
 
-	@RequestMapping(value="data", method = RequestMethod.GET, produces="text/plain")
-	public String getData(@RequestParam String url, @RequestParam String filename) {
+	@RequestMapping(value="datasources", method = RequestMethod.GET, produces="text/plain")
+	public String getDataSources(@RequestParam String url) {
+		var result = new ArrayList<List<String>>();
+		result.add(List.of("name", "filename"));
+		hyperService.getDataSources(url).forEach((k, v) -> result.add(List.of(k, v)));
+		return Csv.toCsv(result);
+	}
 
+	@RequestMapping(value="data", method = RequestMethod.GET, produces="text/plain", params = {"url", "filename"})
+	public String getDataByFilename(@RequestParam String url, @RequestParam String filename) {
 		try {
-			return Csv.toCsv(hyperService.getData(url, filename));
+			return Csv.toCsv(hyperService.getDataByFilename(url, filename));
+		} catch (DataException e) {
+			return Csv.toCsv(e);
+		}
+	}
+
+	@RequestMapping(value="data", method = RequestMethod.GET, produces="text/plain", params = {"url", "name"})
+	public String getDataByName(@RequestParam String url, @RequestParam String name) {
+		try {
+			return Csv.toCsv(hyperService.getDataByName(url, name));
 		} catch (DataException e) {
 			return Csv.toCsv(e);
 		}
@@ -41,7 +58,7 @@ public class Controller {
 	 */
 	private static class Csv {
 		static String toCsv(String singleHeader, List<String> singleColumn) {
-			List<List<String>> list = new ArrayList<>();
+			var list = new ArrayList<List<String>>();
 			list.add(List.of(singleHeader));
 			singleColumn.forEach(v -> list.add(List.of(v)));
 			return toCsv(list);
@@ -52,8 +69,8 @@ public class Controller {
 		}
 
 		static String toCsv(List<List<String>> rows) {
-			StringWriter writer = new StringWriter();
-			CsvListWriter csvWriter = new CsvListWriter(writer, CsvPreference.STANDARD_PREFERENCE);
+			var writer = new StringWriter();
+			var csvWriter = new CsvListWriter(writer, CsvPreference.STANDARD_PREFERENCE);
 
 			try {
 				for (List<String> row : rows) {

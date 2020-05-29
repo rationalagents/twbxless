@@ -33,13 +33,30 @@ public class EndToEndTest {
 	}
 
 	@Test
-	public void canGetData() {
+	public void getDataSources() {
+		assertEquals("name,filename\r\nData Source 1,Data/TableauTemp/TEMP_0kf7uk81qi1qyf18sg86d1m8pl9s.hyper\r\n",
+			restTemplate.getForObject("http://localhost:" + port + "/datasources?url=classpath:animal-observations.twbx",
+				String.class));
+	}
+
+	@Test
+	public void canGetDataByName() {
+		assertThat(
+			restTemplate.getForObject("http://localhost:" + port + "/data?url=classpath:animal-observations.twbx"
+				+ "&name=Data Source 1", String.class))
+			.contains("Date,Animal Observed,Animal,Leg Count\r\n")
+			.contains("2020-05-15,Frog,Frog,4\r\n");
+	}
+
+	@Test
+	public void canGetDataByFilename() {
 		assertThat(
 			restTemplate.getForObject("http://localhost:" + port + "/data?url=classpath:animal-observations.twbx"
 				+ "&filename=Data/TableauTemp/TEMP_0kf7uk81qi1qyf18sg86d1m8pl9s.hyper", String.class))
 			.contains("Date,Animal Observed,Animal,Leg Count\r\n")
 			.contains("2020-05-15,Frog,Frog,4\r\n");
 	}
+
 
 	@Test
 	public void issue1CsvEncoding() throws IOException {
