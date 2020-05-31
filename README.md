@@ -3,11 +3,10 @@
 e.g. Excel data models or Google Sheets IMPORTDATA. This is possible thanks to 
 [Tableau's Hyper API](https://help.tableau.com/current/api/hyper_api/en-us/index.html).
 
-It's possibly also useful for sustaining a community of Tableau visualization builders, where creators make new 
-public workbooks from data exported to other public workbooks, rather than having to copy those workbooks and deal 
-with new copies to get new data. Using twbxless this way may require
-[web data connector](https://help.tableau.com/current/pro/desktop/en-us/examples_web_data_connector.htm) 
-or Google Sheets IMPORTDATA, as it doesn't seem Tableau, as of 2020.2, can fetch CSV data from the web on its own.
+It's possibly also useful for sustaining a community of Tableau visualization riffs, where creators make new 
+public workbooks from data exported to other workbooks, rather than having to copy those workbooks and deal 
+with new copies to get new data. ([Let us know how we can improve this!]((/../../issues)) Using twbxless for 
+that may require [a CSV web data connector](https://help.tableau.com/current/pro/desktop/en-us/examples_web_data_connector.htm).
 
 ## Build
 
