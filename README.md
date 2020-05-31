@@ -114,7 +114,7 @@ No. It only reads the data that's directly in the .twbx file.
 
 #### Does Google Sheets' IMPORTDATA work with http:<nolink>//localhost:8080 URLs?
 
-No, Google Sheets needs twbxless to be accessible from the internet. Run twbxless from some serverless somewhere,
+No, Google Sheets IMPORTDATA needs twbxless to be accessible from the internet. Run twbxless from some serverless somewhere,
 e.g. Google Cloud Run, Azure Containers, AWS, or Heroku, instead of on your computer.
 
 
