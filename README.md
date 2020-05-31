@@ -5,7 +5,7 @@ e.g. Excel data models or Google Sheets IMPORTDATA. This is possible thanks to
 
 It's possibly also useful for sustaining a community of Tableau visualization riffs, where creators make new 
 public workbooks from data exported to other workbooks, rather than having to copy those workbooks and deal 
-with new copies to get new data. ([Let us know how we can improve this!]((/../../issues)) Using twbxless for 
+with new copies to get new data. [Let us know how we can improve it!](/../../issues) Using twbxless for 
 that may require [a CSV web data connector](https://help.tableau.com/current/pro/desktop/en-us/examples_web_data_connector.htm).
 
 ## Build
