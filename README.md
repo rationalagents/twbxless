@@ -58,7 +58,7 @@ name,filename
 Hoja1 (genderOverall),Data/Fuentes de datos/Hoja1 (genderOverall).hyper
 ```
 
-Then use the `/data` endpoint, with the same `url`, adding `name`:
+Then use twbxless' `/data` URL,leaving `url` the same, adding `name`:
 
 ```
 http://localhost:8080/data?url=https://public.tableau.com/workbooks/FemaleDirectors.twb&name=Hoja1 (genderOverall)
@@ -78,7 +78,7 @@ Total,2003,female,16,0.076,0
 ...
 ```
 
-URLs like this last `/data` one could be used in any tool that works with CSV URLs, for example Excel's "Get Data From Web", even Tableau itself!
+URLs like this last `/data` URL could be used in any tool that works with CSV URLs, for example Excel's "Get Data From Web", or even Tableau itself if you have a CSV data connector.
 
 ## Frequently asked questions
 
