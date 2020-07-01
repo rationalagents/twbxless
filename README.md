@@ -84,7 +84,11 @@ URLs like this last `/data` URL could be used in any tool that works with CSV UR
 
 ### Does twbxless provide access to the external data sources used to make a workbook?
 
-No. twbxless only reads data that's stored within the .twbx/.hyper files, data that can be viewed in Tableau desktop by anyone who downloads the .twbx file.
+No, twbxless only reads data that's extracted, stored within .twbx files.
+
+### How often can I get fresh data?
+
+Because twbxless only reads the data extracted into the .twbx file, the publisher of the workbook would need to refresh the extract first using Tableau. For example see [How to Keep Data Fresh](https://help.tableau.com/current/online/en-us/to_keep_data_fresh.htm).
 
 ### Does Google Sheets' IMPORTDATA work with http://localhost:8080 URLs like the ones in the examples?
 
