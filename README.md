@@ -37,16 +37,6 @@ If so, you're ready to move on to **Use.**
 
 Ctrl+C will stop the container once you're done with it.
 
-## Config (optional)
-
-twbxless supports 3 configuration environment variables:
-
-**PORT**: lingua franca in servlerless, the port to bind to (default is `8080`)
-
-**HYPEREXEC**: path to the executables (e.g. hyperd or hyperd.exe) packaged with Hyper API (default is `/hyperapi/lib/hyper` since that's where [Dockerfile](Dockerfile) puts them)
-
-**URLPREFIX**: required prefix for any URL retrieved (default is `https://public.tableau.com/`)
-
 ## Use
 
 First you'll need to identify the data extracts within a .twbx that's published on the web. To do that,
@@ -85,6 +75,16 @@ Total,2002,male,201,0.931,0
 Total,2003,female,16,0.076,0
 ...
 ```
+## FAQ
+
+### Does twbxless provide access to the external data sources used to make a workbook?
+
+No. It only reads the data that's directly in the .twbx file.
+
+### Does Google Sheets' IMPORTDATA work with http:<nolink>//localhost:8080 URLs?
+
+No, Google Sheets IMPORTDATA needs twbxless to be accessible from the internet. Run twbxless from some serverless somewhere,
+e.g. Google Cloud Run, Azure Containers, AWS, or Heroku, instead of on your computer.
 
 ## Enhancements & limitations
 
@@ -98,20 +98,19 @@ data source), but never a workbook where there was >1 schema/table in a file.  I
 know which file has the data you want! It'd be nice to improve on that. If interested please
 [stop by enhancement #7](/../../issues/7).
 
-## FAQ
+## Configuring twbxless (optional)
 
-### Does twbxless provide access to the external data sources used to make a workbook?
+twbxless supports 3 configuration environment variables.
 
-No. It only reads the data that's directly in the .twbx file.
+**URLPREFIX**: required prefix for any URL retrieved (default is `https://public.tableau.com/`)
 
-### Does Google Sheets' IMPORTDATA work with http:<nolink>//localhost:8080 URLs?
+**HYPEREXEC**: path to the executables (e.g. hyperd or hyperd.exe) packaged with Hyper API (default is `/hyperapi/lib/hyper` since that's where [Dockerfile](Dockerfile) puts them)
 
-No, Google Sheets IMPORTDATA needs twbxless to be accessible from the internet. Run twbxless from some serverless somewhere,
-e.g. Google Cloud Run, Azure Containers, AWS, or Heroku, instead of on your computer.
+**PORT**: the port to bind to (default is `8080`)
 
-## Alternative build/run steps
+## Building/running outside container (optional, not recommended)
 
-If you want to dev/build/run outside a container, here are partial instructions e.g. for Windows:
+If you want to dev/build/run outside a container, here are partial steps e.g. for Windows:
 
 - provide JDK 14 and gradle
 - [download Hyper API](https://tableau.com/support/releases/hyper-api/latest)
