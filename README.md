@@ -86,17 +86,14 @@ No. It only reads the data that's directly in the .twbx file.
 No, Google Sheets IMPORTDATA needs twbxless to be accessible from the internet. Run twbxless from some serverless somewhere,
 e.g. Google Cloud Run, Azure Containers, AWS, or Heroku, instead of on your computer.
 
-## Enhancements & limitations
+## Limitations
 
 - This doesn't support all column types, for example geography. Any unsupported column will appear in the CSV, but
 non-null values in the column will be `TYPE?`. Please [file an issue with an example workbook](/../../issues) if you'd like support
 for a particular type.
 - Only supports single schema & table per .hyper file. I've seen plenty of workbooks with multiple .hyper files (one per
 data source), but never a workbook where there was >1 schema/table in a file.  If you need this
-[please provide an example workbook for enhancement #4](/../../issues/4).
-- Unfortunately the .hyper filenames within .twbx files are rather opaque. Even after trying `/filenames` you might not
-know which file has the data you want! It'd be nice to improve on that. If interested please
-[stop by enhancement #7](/../../issues/7).
+[please provide an example workbook](/../../issues/4).
 
 ## Configuring twbxless (optional)
 
