@@ -39,34 +39,33 @@ Ctrl+C will stop the container once you're done with it.
 
 ## Use
 
-First you'll need to identify the data extracts within a .twbx that's published on the web. To do that,
-use the `/datasources` endpoint, specifying the `url` to the workbook.
+First you'll need to determine the URL of a Tableau workbook (.twbx file) published on the web.
 
-For example, for [this workbook featured on Viz of the Day](https://public.tableau.com/profile/maximiliano4575#!/vizhome/FemaleDirectors/FemaleDirectors)
-, the `url` we need's the one your web browser navaigates to when you click Tableau Public's "Download" button. 
+For example, [for this workbook featured on Viz of the Day](https://public.tableau.com/profile/maximiliano4575#!/vizhome/FemaleDirectors/FemaleDirectors)
+the `url` needed is the one the browser navigates to (downloading the file) when you click Tableau Public's "Download" button: <https://public.tableau.com/workbooks/FemaleDirectors.twb>.
 
-Use `/datasources` with that `url`:
+Compose that `url` together with twbxless' `/datasources` URL to list the data source extracts in the workbook:
 
 ```
 http://localhost:8080/datasources?url=https://public.tableau.com/workbooks/FemaleDirectors.twb
 ```
 
-and you'll get a list of datasource names (and .hyper filenames) within that workbook, in CSV format. 
+You get a list of data source names (and corresponding extract filenames) within the workbook, in CSV format.
 
-There's just 1 data source in *FemaleDirectors.twb*, named "Hoja1 (genderOverall)":
+There's just 1 data source in *FemaleDirectors.twb*, named *Hoja1 (genderOverall)*:
 
 ```
 name,filename
 Hoja1 (genderOverall),Data/Fuentes de datos/Hoja1 (genderOverall).hyper
 ```
 
-Then switch to the `/data` endpoint, using the same `url`, and specifying the data source `name`:
+Then use the `/data` endpoint, with the same `url`, adding `name`:
 
 ```
 http://localhost:8080/data?url=https://public.tableau.com/workbooks/FemaleDirectors.twb&name=Hoja1 (genderOverall)
 ```
 
-and you'll get back the row/column data from that data source, in CSV format:
+You get back the row/column data from that data source, in CSV format:
 
 ```
 genre,year,gender,freq,percent,filter
@@ -80,17 +79,18 @@ Total,2003,female,16,0.076,0
 ...
 ```
 
-## Use FAQs
+URLs like this last `/data` one could be used in any tool that works with CSV URLs, for example Excel's "Get Data From Web", even Tableau itself!
+
+## Frequently asked questions
 
 ### Does twbxless provide access to the external data sources used to make a workbook?
 
-No. twbxless only reads the data that's stored within the .twbx/.hyper files, data that can be viewed in Tableau desktop
-by anyone who downloads the .twbx file.
+No. twbxless only reads data that's stored within the .twbx/.hyper files, data that can be viewed in Tableau desktop by anyone who downloads the .twbx file.
 
-### Does Google Sheets' IMPORTDATA work with http:<nolink>//localhost:8080 URLs?
+### Does Google Sheets' IMPORTDATA work with http://localhost:8080 URLs like the ones in the examples?
 
-No, Google Sheets IMPORTDATA needs twbxless to be accessible from the internet. Run twbxless from some serverless somewhere,
-e.g. Google Cloud Run, Azure Containers, AWS, or Heroku, instead of on your computer.
+No, unfortunately Google Sheets IMPORTDATA URLs need to be accessible from the internet. Run twbxless from a cloud container host,
+e.g. Google Cloud Run, Azure Containers, or AWS ECS, instead of on your computer, if you need to use it with Google Sheets.
 
 ## Limitations
 
@@ -103,13 +103,13 @@ data source), but never a workbook where there was more than one schema/table in
 
 ## Configuration (optional)
 
-twbxless supports 3 configuration environment variables.
+twbxless supports 3 configuration environment variables
 
-**URLPREFIX**: required prefix for any URL retrieved (default is `https://public.tableau.com/`)
-
-**HYPEREXEC**: path to the executables (e.g. hyperd or hyperd.exe) packaged with Hyper API (default is `/hyperapi/lib/hyper` since that's where [Dockerfile](Dockerfile) puts them)
-
-**PORT**: the port to bind to (default is `8080`)
+> **URLPREFIX**: required prefix for any URL retrieved (default is `https://public.tableau.com/`)
+>
+> **HYPEREXEC**: path to the executables (e.g. hyperd or hyperd.exe) packaged with Hyper API (default is `/hyperapi/lib/hyper` since that's where [Dockerfile](Dockerfile) puts them)
+>
+> **PORT**: the port to bind to (default is `8080`)
 
 ## Building/running outside container (optional, not recommended)
 
