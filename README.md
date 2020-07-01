@@ -1,13 +1,12 @@
 # twbxless
 
 *twbxless* makes data exported in Tableau packaged workbook files (.twbx) available at CSV URLs for other tools,
-e.g. Excel data models or Google Sheets IMPORTDATA. This is possible thanks to
-[Tableau's Hyper API](https://help.tableau.com/current/api/hyper_api/en-us/index.html).
+e.g. Excel data models or Google Sheets IMPORTDATA. This is possible thanks to Tableau's
+[Hyper API](https://help.tableau.com/current/api/hyper_api/en-us/index.html).
 
-It's possibly also useful for sustaining a community of Tableau visualization riffs, where creators make new
-public workbooks from data exported to other workbooks, rather than having to copy those workbooks and deal
-with new copies to get new data. [Let us know how we can improve it!](/../../issues) Using twbxless for
-that may require [a CSV web data connector](https://help.tableau.com/current/pro/desktop/en-us/examples_web_data_connector.htm).
+It's possibly also useful for sustaining a community of Tableau visualization makers, where new workbooks are made from data available only through other workbooks/twbxless. Using twbxless as a data source in Tableau may require [a CSV web data connector](https://help.tableau.com/current/pro/desktop/en-us/examples_web_data_connector.htm).
+
+[Let us know how we can make twbxless better](/../../issues)!
 
 ## Build
 
