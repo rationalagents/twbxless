@@ -40,29 +40,33 @@ Ctrl+C will stop the container once you're done with it.
 ## Use
 
 First you'll need to identify the data extracts within a .twbx that's published on the web. To do that,
-use the `/filenames` endpoint, specifying the `url` to the workbook.
+use the `/datasources` endpoint, specifying the `url` to the workbook.
 
 For example, for [this workbook featured on Viz of the Day](https://public.tableau.com/profile/maximiliano4575#!/vizhome/FemaleDirectors/FemaleDirectors)
-, the `url` we need's the one backing Tableau Public's "Download" button. Use `/filenames` with that `url`:
+, the `url` we need's the one your web browser navaigates to when you click Tableau Public's "Download" button. 
+
+Use `/datasources` with that `url`:
 
 ```
-http://localhost:8080/filenames?url=https://public.tableau.com/workbooks/FemaleDirectors.twb
+http://localhost:8080/datasources?url=https://public.tableau.com/workbooks/FemaleDirectors.twb
 ```
 
-and in CSV format you get a list of .hyper extract filenames within that workbook (there's just 1 in *FemaleDirectors.twb*):
+and you'll get a list of datasource names (and .hyper filenames) within that workbook, in CSV format. 
+
+There's just 1 data source in *FemaleDirectors.twb*, named "Hoja1 (genderOverall)":
 
 ```
-filenames
-Data/Fuentes de datos/Hoja1 (genderOverall).hyper
+name,filename
+Hoja1 (genderOverall),Data/Fuentes de datos/Hoja1 (genderOverall).hyper
 ```
 
-Then we switch to the `/data` endpoint, using the same `url`, adding `filename`:
+Then switch to the `/data` endpoint, using the same `url`, and specifying the data source `name`:
 
 ```
-http://localhost:8080/data?url=https://public.tableau.com/workbooks/FemaleDirectors.twb&filename=Data/Fuentes de datos/Hoja1 (genderOverall).hyper
+http://localhost:8080/data?url=https://public.tableau.com/workbooks/FemaleDirectors.twb&name=Hoja1 (genderOverall)
 ```
 
-and we get the data from that file
+and you'll get back the row/column data from that data source, in CSV format:
 
 ```
 genre,year,gender,freq,percent,filter
@@ -75,11 +79,13 @@ Total,2002,male,201,0.931,0
 Total,2003,female,16,0.076,0
 ...
 ```
-## FAQ
+
+## Use FAQs
 
 ### Does twbxless provide access to the external data sources used to make a workbook?
 
-No. It only reads the data that's directly in the .twbx file.
+No. twbxless only reads the data that's stored within the .twbx/.hyper files, data that can be viewed in Tableau desktop
+by anyone who downloads the .twbx file.
 
 ### Does Google Sheets' IMPORTDATA work with http:<nolink>//localhost:8080 URLs?
 
@@ -88,14 +94,14 @@ e.g. Google Cloud Run, Azure Containers, AWS, or Heroku, instead of on your comp
 
 ## Limitations
 
-- This doesn't support all column types, for example geography. Any unsupported column will appear in the CSV, but
-non-null values in the column will be `TYPE?`. Please [file an issue with an example workbook](/../../issues) if you'd like support
-for a particular type.
-- Only supports single schema & table per .hyper file. I've seen plenty of workbooks with multiple .hyper files (one per
-data source), but never a workbook where there was >1 schema/table in a file.  If you need this
+- twbxless doesn't support all column types, for example geography. Unsupported columns will appear in the `/data` response, but
+non-null values in those columns appear as `TYPE?`. Please [file an issue with an example workbook](/../../issues) if you'd like
+support for a particular type.
+- twbxless supports a single schema & table per .hyper file. I've seen plenty of workbooks with multiple .hyper files (one per
+data source), but never a workbook where there was more than one schema/table in the file. If you need this
 [please provide an example workbook](/../../issues/4).
 
-## Configuring twbxless (optional)
+## Configuration (optional)
 
 twbxless supports 3 configuration environment variables.
 
