@@ -13,7 +13,11 @@ that may require [a CSV web data connector](https://help.tableau.com/current/pro
 
 To build twbxless as a container, provide
 [Docker](https://hub.docker.com/search?q=&type=edition&offering=community&sort=updated_at&order=desc)
-then `docker build . -t twbxless`.
+then run
+
+```
+docker build . -t twbxless
+```
 
 ## Run
 
@@ -29,7 +33,7 @@ You should see
 2020-05-14 23:39:50.695  INFO 1 --- [main] com.rationalagents.twbxless.Application     : Starting Application
 ```
 
-indicating it's running, and you're ready to move onto **Use.**
+If so, you're ready to move on to **Use.**
 
 Ctrl+C will stop the container once you're done with it.
 
