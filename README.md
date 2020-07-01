@@ -1,48 +1,37 @@
 # twbxless
-*twbxless* makes data exported in Tableau packaged workbook files (.twbx) available at CSV URLs for other tools, 
-e.g. Excel data models or Google Sheets IMPORTDATA. This is possible thanks to 
+
+*twbxless* makes data exported in Tableau packaged workbook files (.twbx) available at CSV URLs for other tools,
+e.g. Excel data models or Google Sheets IMPORTDATA. This is possible thanks to
 [Tableau's Hyper API](https://help.tableau.com/current/api/hyper_api/en-us/index.html).
 
-It's possibly also useful for sustaining a community of Tableau visualization riffs, where creators make new 
-public workbooks from data exported to other workbooks, rather than having to copy those workbooks and deal 
-with new copies to get new data. [Let us know how we can improve it!](/../../issues) Using twbxless for 
+It's possibly also useful for sustaining a community of Tableau visualization riffs, where creators make new
+public workbooks from data exported to other workbooks, rather than having to copy those workbooks and deal
+with new copies to get new data. [Let us know how we can improve it!](/../../issues) Using twbxless for
 that may require [a CSV web data connector](https://help.tableau.com/current/pro/desktop/en-us/examples_web_data_connector.htm).
 
 ## Build
 
-To build twbxless as a container, provide 
+To build twbxless as a container, provide
 [Docker](https://hub.docker.com/search?q=&type=edition&offering=community&sort=updated_at&order=desc)
 then `docker build . -t twbxless`.
 
-If you want to dev/build outside a container,
- - provide JDK 14 and gradle
- - [download Hyper API for Java](https://tableau.com/support/releases/hyper-api/latest)
- - extract *lib* from the Hyper API for Java package and put it along side *src*
- - `gradle build`
-
 ## Run
 
-After building the container, run
+After building, run
 
 ```
 docker run -it -p8080:8080 twbxless:latest
 ```
 
-and you should see output like:
+You should see
 
 ```
 2020-05-14 23:39:50.695  INFO 1 --- [main] com.rationalagents.twbxless.Application     : Starting Application
 ```
 
-That means it's running, and you're ready to move onto **Use.** You can Ctrl+C to stop.
+indicating it's running, and you're ready to move onto **Use.**
 
-If you're thinking "yeah, I already did hard way once, `gradle build`, it definitely built, let me keep on this 
-so-called hard way, and I'm on Windows, so whatcha got for me dawg", do something like this:
-
-```
-set HYPEREXEC=lib\hyper
-java -jar build/libs/twbxless.jar
-```
+Ctrl+C will stop the container once you're done with it.
 
 ## Config (optional)
 
@@ -54,14 +43,13 @@ twbxless supports 3 configuration environment variables:
 
 **URLPREFIX**: required prefix for any URL retrieved (default is `https://public.tableau.com/`)
 
-
 ## Use
 
-First you'll need to identify the data extracts within a .twbx that's published on the web. To do that, 
+First you'll need to identify the data extracts within a .twbx that's published on the web. To do that,
 use the `/filenames` endpoint, specifying the `url` to the workbook.
 
 For example, for [this workbook featured on Viz of the Day](https://public.tableau.com/profile/maximiliano4575#!/vizhome/FemaleDirectors/FemaleDirectors)
-, the `url` we need's the one backing Tableau Public's "Download" button. Use `/filenames` with that `url`: 
+, the `url` we need's the one backing Tableau Public's "Download" button. Use `/filenames` with that `url`:
 
 ```
 http://localhost:8080/filenames?url=https://public.tableau.com/workbooks/FemaleDirectors.twb
@@ -96,8 +84,8 @@ Total,2003,female,16,0.076,0
 
 ## Enhancements & limitations
 
-- This doesn't support all column types, for example geography. It'll include unsupported columns in the CSV, but 
-non-null values will be `TYPE?`. Please [file an issue with an example workbook](/../../issues) if you'd like support
+- This doesn't support all column types, for example geography. Any unsupported column will appear in the CSV, but
+non-null values in the column will be `TYPE?`. Please [file an issue with an example workbook](/../../issues) if you'd like support
 for a particular type.
 - Only supports single schema & table per .hyper file. I've seen plenty of workbooks with multiple .hyper files (one per
 data source), but never a workbook where there was >1 schema/table in a file.  If you need this
@@ -108,13 +96,22 @@ know which file has the data you want! It'd be nice to improve on that. If inter
 
 ## FAQ
 
-#### Does twbxless provide access to the external data sources used to make a workbook?
+### Does twbxless provide access to the external data sources used to make a workbook?
 
 No. It only reads the data that's directly in the .twbx file.
 
-#### Does Google Sheets' IMPORTDATA work with http:<nolink>//localhost:8080 URLs?
+### Does Google Sheets' IMPORTDATA work with http:<nolink>//localhost:8080 URLs?
 
 No, Google Sheets IMPORTDATA needs twbxless to be accessible from the internet. Run twbxless from some serverless somewhere,
 e.g. Google Cloud Run, Azure Containers, AWS, or Heroku, instead of on your computer.
 
+## Alternative build/run steps
 
+If you want to dev/build/run outside a container, here are partial instructions e.g. for Windows:
+
+- provide JDK 14 and gradle
+- [download Hyper API](https://tableau.com/support/releases/hyper-api/latest)
+- extract *lib* from the Hyper API package and put it along side *src*
+- `gradle build`
+- `set HYPEREXEC=lib\hyper`
+- `java -jar build/libs/twbxless.jar`
