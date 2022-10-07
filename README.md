@@ -49,16 +49,16 @@ Compose that `url` together with twbxless' `/datasources` URL to list the data s
 http://localhost:8080/datasources?url=https://public.tableau.com/workbooks/FemaleDirectors.twb
 ```
 
-You get a list of data source names (and corresponding extract filenames) within the workbook, in CSV format.
-
-There's just 1 data source in *FemaleDirectors.twb*, named *Hoja1 (genderOverall)*:
+You get a list of data source names (and corresponding extract filenames) within the workbook, in CSV format:
 
 ```
 name,filename
 Hoja1 (genderOverall),Data/Fuentes de datos/Hoja1 (genderOverall).hyper
 ```
 
-Then use twbxless' `/data` URL,leaving `url` the same, adding `name`:
+There's just 1 data source in *FemaleDirectors.twb*, named *Hoja1 (genderOverall)*:
+
+Then use twbxless' `/data` URL, same `url`, add data source `name`:
 
 ```
 http://localhost:8080/data?url=https://public.tableau.com/workbooks/FemaleDirectors.twb&name=Hoja1 (genderOverall)
