@@ -21,26 +21,12 @@ public class Controller {
 		this.hyperService = hyperService;
 	}
 
-	@RequestMapping(value="filenames", method = RequestMethod.GET, produces="text/plain")
-	public String getFilenames(@RequestParam String url) {
-		return Csv.toCsv("filenames", hyperService.getFilenames(url));
-	}
-
 	@RequestMapping(value="datasources", method = RequestMethod.GET, produces="text/plain")
 	public String getDataSources(@RequestParam String url) {
 		var result = new ArrayList<List<String>>();
 		result.add(List.of("name", "filename"));
 		hyperService.getDataSources(url).forEach((k, v) -> result.add(List.of(k, v)));
 		return Csv.toCsv(result);
-	}
-
-	@RequestMapping(value="data", method = RequestMethod.GET, produces="text/plain", params = {"url", "filename"})
-	public String getDataByFilename(@RequestParam String url, @RequestParam String filename) {
-		try {
-			return Csv.toCsv(hyperService.getDataByFilename(url, filename));
-		} catch (DataException e) {
-			return Csv.toCsv(e);
-		}
 	}
 
 	@RequestMapping(value="data", method = RequestMethod.GET, produces="text/plain", params = {"url", "name"})

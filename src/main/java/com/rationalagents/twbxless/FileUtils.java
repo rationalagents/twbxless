@@ -30,12 +30,4 @@ public class FileUtils {
 		return file.getAbsolutePath();
 	}
 
-	/**
-	 * Reads all bytes to String assuming UTF-8 and closes stream
-	 */
-	public static String readToEnd(InputStream stream) throws IOException {
-		try (stream) {
-			return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
-		}
-	}
 }
