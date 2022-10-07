@@ -1,15 +1,17 @@
-FROM openjdk:14-buster as build
+FROM eclipse-temurin:17-jdk-centos7 as build
 MAINTAINER wade@rationalagents.com
 
-# Download Hyper API to /hyperapi
-RUN wget -q https://downloads.tableau.com/tssoftware/tableauhyperapi-java-linux-x86_64-release-hyperapi_release_7.0.0.10622.rf45095f2.zip -O /wget-out.zip \
-  && unzip -q /wget-out.zip -d /hyperapi \
+RUN yum -y install unzip
+
+# Download/unzip Hyper API to /hyperapi
+RUN wget -q https://downloads.tableau.com/tssoftware/tableauhyperapi-java-linux-x86_64-release-main.0.0.15735.re214804e.zip -O /wget-out.zip
+RUN unzip -q /wget-out.zip -d /hyperapi \
   && mv /hyperapi/*/* /hyperapi
 
 # Install gradle
-RUN wget -q https://services.gradle.org/distributions/gradle-6.4-bin.zip -O /wget-out.zip \
-  && unzip -q /wget-out.zip -d /opt/gradle
-ENV PATH="${PATH}:/opt/gradle/gradle-6.4/bin"
+RUN wget -q https://services.gradle.org/distributions/gradle-7.5.1-bin.zip -O /wget-out.zip
+RUN unzip -q /wget-out.zip -d /opt/gradle
+ENV PATH="${PATH}:/opt/gradle/gradle-7.5.1/bin"
 
 # Build twbxless.jar (note build.gradle has a ref to lib, thus workdir /hyperapi)
 WORKDIR /hyperapi
@@ -18,7 +20,7 @@ COPY src ./src
 RUN gradle build
 
 # Now the runtime image, keeping only Hyper API lib and twbxless.jar
-FROM openjdk:14-slim
+FROM eclipse-temurin:17-jre-centos7
 COPY --from=build /hyperapi/lib /hyperapi/lib
 COPY --from=build /hyperapi/build/libs/twbxless.jar /hyperapi/lib
 
