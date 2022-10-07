@@ -59,10 +59,12 @@ public class EndToEndTest {
 
 
 	@Test
-	public void issue1CsvEncoding() throws IOException {
-		assertEquals(
+	public void issue1CsvEncoding() {
+		assertThat(
 			restTemplate.getForObject("http://localhost:" + port + "/data?url=classpath:tricky.twbx"
-				+ "&filename=.hyper", String.class),
-				FileUtils.readToEnd(getClass().getClassLoader().getResourceAsStream("tricky.csv")));
+				+ "&filename=.hyper", String.class))
+				.contains("Tricky Values,Count\r\n")
+				.contains("\"Commas, Escaped\",1\r\n") // commas are escaped by being within quotes
+				.contains("\"Air Quotes Are \"\"Cool\"\"\",2\r\n"); // quotes are escaped by double quotes within quotes
 	}
 }
