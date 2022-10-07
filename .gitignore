@@ -8,6 +8,8 @@ gradlew
 
 .idea
 
+.DS_Store
+
 # you can put hyperapi's lib here to build easily in IntelliJ, outside Docker, but not in git thanks
 lib/
 
