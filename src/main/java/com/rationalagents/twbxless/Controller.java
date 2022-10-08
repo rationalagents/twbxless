@@ -10,7 +10,6 @@ import org.supercsv.prefs.CsvPreference;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -22,26 +21,12 @@ public class Controller {
 		this.hyperService = hyperService;
 	}
 
-	@RequestMapping(value="filenames", method = RequestMethod.GET, produces="text/plain")
-	public String getFilenames(@RequestParam String url) {
-		return Csv.toCsv("filenames", hyperService.getFilenames(url));
-	}
-
 	@RequestMapping(value="datasources", method = RequestMethod.GET, produces="text/plain")
 	public String getDataSources(@RequestParam String url) {
 		var result = new ArrayList<List<String>>();
-		result.add(List.of("name", "filename"));
-		hyperService.getDataSources(url).forEach((k, v) -> result.add(List.of(k, v)));
+		result.add(List.of("name"));
+		hyperService.getDataSources(url).forEach((k, v) -> result.add(List.of(k)));
 		return Csv.toCsv(result);
-	}
-
-	@RequestMapping(value="data", method = RequestMethod.GET, produces="text/plain", params = {"url", "filename"})
-	public String getDataByFilename(@RequestParam String url, @RequestParam String filename) {
-		try {
-			return Csv.toCsv(hyperService.getDataByFilename(url, filename));
-		} catch (DataException e) {
-			return Csv.toCsv(e);
-		}
 	}
 
 	@RequestMapping(value="data", method = RequestMethod.GET, produces="text/plain", params = {"url", "name"})
@@ -54,7 +39,7 @@ public class Controller {
 	}
 
 	/**
-	 * Nicer here would be message converter but planning to do something else
+	 * Nicer here would be message converter
 	 */
 	private static class Csv {
 		static String toCsv(String singleHeader, List<String> singleColumn) {

@@ -7,8 +7,6 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.TestPropertySource;
 
-import java.io.IOException;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -26,15 +24,8 @@ public class EndToEndTest {
 	private TestRestTemplate restTemplate;
 
 	@Test
-	public void canGetFilenames() {
-		assertEquals("filenames\r\nData/TableauTemp/TEMP_0kf7uk81qi1qyf18sg86d1m8pl9s.hyper\r\n",
-			restTemplate.getForObject("http://localhost:" + port + "/filenames?url=classpath:animal-observations.twbx",
-				String.class));
-	}
-
-	@Test
 	public void getDataSources() {
-		assertEquals("name,filename\r\nData Source 1,Data/TableauTemp/TEMP_0kf7uk81qi1qyf18sg86d1m8pl9s.hyper\r\n",
+		assertEquals("name\r\nData Source 1\r\n",
 			restTemplate.getForObject("http://localhost:" + port + "/datasources?url=classpath:animal-observations.twbx",
 				String.class));
 	}
@@ -49,20 +40,12 @@ public class EndToEndTest {
 	}
 
 	@Test
-	public void canGetDataByFilename() {
+	public void issue1CsvEncoding() {
 		assertThat(
-			restTemplate.getForObject("http://localhost:" + port + "/data?url=classpath:animal-observations.twbx"
-				+ "&filename=Data/TableauTemp/TEMP_0kf7uk81qi1qyf18sg86d1m8pl9s.hyper", String.class))
-			.contains("Date,Animal Observed,Animal,Leg Count\r\n")
-			.contains("2020-05-15,Frog,Frog,4\r\n");
-	}
-
-
-	@Test
-	public void issue1CsvEncoding() throws IOException {
-		assertEquals(
 			restTemplate.getForObject("http://localhost:" + port + "/data?url=classpath:tricky.twbx"
-				+ "&filename=.hyper", String.class),
-				FileUtils.readToEnd(getClass().getClassLoader().getResourceAsStream("tricky.csv")));
+				+ "&name=tricky", String.class))
+				.contains("Tricky Values,Count\r\n")
+				.contains("\"Commas, Escaped\",1\r\n") // commas are escaped by being within quotes
+				.contains("\"Air Quotes Are \"\"Cool\"\"\",2\r\n"); // quotes are escaped by double quotes within quotes
 	}
 }
