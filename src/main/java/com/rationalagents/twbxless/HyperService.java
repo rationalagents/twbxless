@@ -97,15 +97,15 @@ public class HyperService {
 	}
 
 	/**
-	 * Returns data for specified filename within URL.
-	 *
-	 * The first file that is an ends-with match with filename will be used, since the filenames can be rather long
-	 * with a redundant path part.
+	 * Returns data from the Hyper-formatted file specified by fileName, stored within .twbx file at
+	 * provided url.
 	 */
 	public List<List<String>> getDataByFilename(String url, String fileName) {
-		var extractedFileName = extract(url, (name) -> {
-			return name.endsWith(".hyper") && name.endsWith(fileName); /* allow ends-with to match */
-		});
+
+		// For simplification and easier testing - in case paths in .twbx do change on save - we check
+		// for ends-with match only.
+		var extractedFileName = extract(url, (file) -> file.endsWith(fileName));
+
 		if (extractedFileName == null) {
 			throw new DataException("No file match", List.of(fileName));
 		}

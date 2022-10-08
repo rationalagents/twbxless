@@ -25,7 +25,7 @@ public class EndToEndTest {
 
 	@Test
 	public void getDataSources() {
-		assertEquals("name,filename\r\nData Source 1,Data/TableauTemp/TEMP_0kf7uk81qi1qyf18sg86d1m8pl9s.hyper\r\n",
+		assertEquals("name\r\nData Source 1\r\n",
 			restTemplate.getForObject("http://localhost:" + port + "/datasources?url=classpath:animal-observations.twbx",
 				String.class));
 	}

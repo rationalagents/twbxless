@@ -24,8 +24,8 @@ public class Controller {
 	@RequestMapping(value="datasources", method = RequestMethod.GET, produces="text/plain")
 	public String getDataSources(@RequestParam String url) {
 		var result = new ArrayList<List<String>>();
-		result.add(List.of("name", "filename"));
-		hyperService.getDataSources(url).forEach((k, v) -> result.add(List.of(k, v)));
+		result.add(List.of("name"));
+		hyperService.getDataSources(url).forEach((k, v) -> result.add(List.of(k)));
 		return Csv.toCsv(result);
 	}
 
