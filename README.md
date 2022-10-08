@@ -61,7 +61,7 @@ This tells us there's just 1 data source in *FemaleDirectors.twb*, named *Hoja1 
 Then use twbxless' `/data` URL, with the same `url` param/value, adding `name`:
 
 ```
-http://localhost:8080/data?url=https://public.tableau.com/workbooks/FemaleDirectors.twb&name=Hoja1 (genderOverall)
+http://localhost:8080/data?url=https://public.tableau.com/workbooks/FemaleDirectors.twb&name=Hoja1%20(genderOverall)
 ```
 
 You get back the row/column data from that data source, in CSV format:
