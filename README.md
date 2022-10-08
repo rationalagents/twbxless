@@ -49,11 +49,11 @@ Compose that `url` together with twbxless' `/datasources` URL to list the data s
 http://localhost:8080/datasources?url=https://public.tableau.com/workbooks/FemaleDirectors.twb
 ```
 
-You get a list of data source names (and corresponding extract filenames) within the workbook, in CSV format:
+You get a list of data source names (and corresponding extract filenames) within the workbook, in CSV format (yeah, only one column):
 
 ```
-name,filename
-Hoja1 (genderOverall),Data/Fuentes de datos/Hoja1 (genderOverall).hyper
+name
+Hoja1 (genderOverall)
 ```
 
 This tells us there's just 1 data source in *FemaleDirectors.twb*, named *Hoja1 (genderOverall)*.
